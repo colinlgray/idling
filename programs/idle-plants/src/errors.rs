@@ -28,4 +28,7 @@ pub enum IdlePlantsError {
 
     #[msg("The provided token account is not owned by this user")]
     PlantTokenAccountNotOwned,
+
+    #[msg("The provided plant has not reached it's required watering and time yet")]
+    PlantNotGrown,
 }

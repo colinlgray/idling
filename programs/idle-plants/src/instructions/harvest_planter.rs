@@ -1,7 +1,9 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, MintTo, Token, TokenAccount};
+use anchor_spl::token::{mint_to, Mint, MintTo, Token, TokenAccount};
+use idle_common::random;
 
 use crate::errors::IdlePlantsError;
+use crate::id;
 use crate::state::{Plant, Planter, PLANTER_PREFIX};
 
 #[derive(Accounts)]
@@ -49,10 +51,44 @@ impl<'info> HarvestPlanter<'info> {
 }
 
 pub fn handler(ctx: Context<HarvestPlanter>) -> ProgramResult {
+    let owner = &ctx.accounts.owner;
     let plant = &ctx.accounts.plant;
     let planter = &ctx.accounts.planter;
 
-    //TODO: figure out random number of plants to award
+    if planter.times_watered < plant.data.required_waterings {
+        return Err(IdlePlantsError::PlantNotGrown.into());
+    }
+
+    let now = Clock::get()?.unix_timestamp;
+    let elapsed = now.saturating_sub(planter.last_watered);
+
+    if elapsed < plant.data.time_till_thirsty {
+        return Err(IdlePlantsError::PlantNotGrown.into());
+    }
+
+    let (harvest_entropy, _) = Pubkey::find_program_address(
+        &[
+            &owner.key().to_bytes(),
+            &plant.key().to_bytes(),
+            &planter.key().to_bytes(),
+            &now.to_le_bytes(),
+            &planter.created_at.to_le_bytes(),
+        ],
+        &id(),
+    );
+
+    let rewards = random(
+        &[
+            &harvest_entropy.to_bytes(),
+            &planter.entropy,
+            &now.to_le_bytes(),
+            &planter.created_at.to_le_bytes(),
+        ],
+        plant.data.min_growth,
+        plant.data.max_growth,
+    );
+
+    mint_to(ctx.accounts.mint_harvest_ctx(), rewards)?;
 
     Ok(())
 }

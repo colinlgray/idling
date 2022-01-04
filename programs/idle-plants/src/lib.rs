@@ -24,4 +24,8 @@ pub mod idle_plants {
     pub fn water_planter(ctx: Context<WaterPlanter>) -> ProgramResult {
         instructions::water_planter::handler(ctx)
     }
+
+    pub fn harvest_planter(ctx: Context<HarvestPlanter>) -> ProgramResult {
+        instructions::harvest_planter::handler(ctx)
+    }
 }
