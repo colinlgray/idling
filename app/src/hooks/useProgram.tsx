@@ -7,6 +7,9 @@ import idl from "../idl.json";
 const opts: ConfirmOptions = {
   preflightCommitment: "processed",
 };
+
+// LocalHost program id: GS4dQdangqbtGJDJecgGscv6m5wmq7wYC6Q8DzCWXMxh
+
 const programId = new PublicKey("3zPPaZhN3tAkSJhjcEcyT7kAM6b2stQmJf65Fw9sMZa3");
 export function useProgram() {
   const wallet = useAnchorWallet();
