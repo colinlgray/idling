@@ -3,3 +3,5 @@ members = [
     "programs/*",
     "lib/*"
 ]
+
+cargo-features = ["edition2021"]

@@ -10,4 +10,6 @@ pub struct Clicker {
     pub owner: Pubkey,
     /// The last time the owner received their click reward
     pub last_redeemed: i64,
+    /// If the clicker has been initialzed already
+    pub is_initialized: bool,
 }

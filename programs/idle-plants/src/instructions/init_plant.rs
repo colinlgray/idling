@@ -1,9 +1,8 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::Mint;
+use anchor_spl::token::{Mint, Token};
 use idle_common::AnchorSize;
 use idling::state::Treasury;
 
-use crate::errors::IdlePlantsError;
 use crate::state::{Plant, PlantData, PLANT_PREFIX};
 
 #[derive(Accounts)]
@@ -18,7 +17,10 @@ pub struct InitPlant<'info> {
     pub plant: Account<'info, Plant>,
 
     #[account(
-      constraint = plant_mint.mint_authority.contains(&plant.key()) @ IdlePlantsError::InvalidPlantMint
+      init, 
+      mint::decimals = 0, 
+      mint::authority = plant, 
+      payer = authority
     )]
     pub plant_mint: Account<'info, Mint>,
 
@@ -29,10 +31,12 @@ pub struct InitPlant<'info> {
     pub treasury: Account<'info, Treasury>,
 
     /// The authority over the treasury
-    #[account(mut, signer)]
-    pub authority: AccountInfo<'info>,
+    #[account(mut)]
+    pub authority: Signer<'info>,
 
     pub system_program: Program<'info, System>,
+    pub token_program: Program<'info, Token>,
+    pub rent: Sysvar<'info, Rent>
 }
 
 pub fn handler(ctx: Context<InitPlant>, data: PlantData) -> ProgramResult {

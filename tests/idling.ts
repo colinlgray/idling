@@ -6,6 +6,8 @@ import { expect } from "chai";
 
 const systemProgram = web3.SystemProgram.programId;
 const tokenProgram = splToken.TOKEN_PROGRAM_ID;
+const associatedTokenProgram = splToken.ASSOCIATED_TOKEN_PROGRAM_ID;
+const rent = web3.SYSVAR_RENT_PUBKEY;
 
 describe("idling", () => {
   const treasuryAuthority = web3.Keypair.generate();
@@ -32,12 +34,11 @@ describe("idling", () => {
 
   let treasury: web3.PublicKey;
   let treasuryMintAuthority: web3.PublicKey;
-  let treasuryMintAuthorityBump: number;
   let treasuryMint: splToken.Token;
 
   const playerWallet = web3.Keypair.generate();
   let playerClicker: web3.PublicKey;
-  let playerRewardDest: splToken.AccountInfo;
+  let playerRewardDest: web3.PublicKey;
 
   before(async () => {
     await airdrop(treasuryAuthority.publicKey, 10);
@@ -48,11 +49,10 @@ describe("idling", () => {
       program.programId
     );
 
-    [treasuryMintAuthority, treasuryMintAuthorityBump] =
-      await web3.PublicKey.findProgramAddress(
-        [Buffer.from("treasury"), Buffer.from("mint")],
-        program.programId
-      );
+    [treasuryMintAuthority] = await web3.PublicKey.findProgramAddress(
+      [Buffer.from("treasury"), Buffer.from("mint")],
+      program.programId
+    );
 
     treasuryMint = await splToken.Token.createMint(
       provider.connection,
@@ -63,9 +63,16 @@ describe("idling", () => {
       splToken.TOKEN_PROGRAM_ID
     );
 
-    playerRewardDest = await treasuryMint.getOrCreateAssociatedAccountInfo(
+    playerRewardDest = await splToken.Token.getAssociatedTokenAddress(
+      associatedTokenProgram,
+      tokenProgram,
+      treasuryMint.publicKey,
       playerWallet.publicKey
     );
+
+    // playerRewardDest = await treasuryMint.getOrCreateAssociatedAccountInfo(
+    //   playerWallet.publicKey
+    // );
 
     [playerClicker] = await web3.PublicKey.findProgramAddress(
       [Buffer.from("clicker"), playerWallet.publicKey.toBuffer()],
@@ -84,22 +91,7 @@ describe("idling", () => {
     });
   });
 
-  it("Initializes a clicker for a player", async () => {
-    await program.rpc.initClicker({
-      accounts: {
-        clicker: playerClicker,
-        owner: playerWallet.publicKey,
-        systemProgram,
-      },
-      signers: [playerWallet],
-    });
-  });
-
   it("grants the rewards for a player click", async () => {
-    console.log("sleeping 3 seconds to ensure click is available");
-    await new Promise((resolve) => {
-      setTimeout(resolve, 3000);
-    });
     await program.rpc.doClick({
       accounts: {
         owner: playerWallet.publicKey,
@@ -107,15 +99,20 @@ describe("idling", () => {
         treasury,
         treasuryMintAuthority,
         treasuryMint: treasuryMint.publicKey,
-        rewardDest: playerRewardDest.address,
+        rewardDest: playerRewardDest,
         tokenProgram,
+        systemProgram,
+        associatedTokenProgram,
+        rent,
       },
       signers: [playerWallet],
     });
-    playerRewardDest = await treasuryMint.getOrCreateAssociatedAccountInfo(
-      playerWallet.publicKey
-    );
-    expect(playerRewardDest.amount.eqn(50)).to.be.true;
+    let playerRewardDestAcct =
+      await treasuryMint.getOrCreateAssociatedAccountInfo(
+        playerWallet.publicKey
+      );
+    expect(playerRewardDestAcct.amount.eqn(50), "player account has 50 tokens")
+      .to.be.true;
   });
 
   it("prevents rewards from being claimed too quickly", async () => {
@@ -128,8 +125,47 @@ describe("idling", () => {
           treasury,
           treasuryMintAuthority,
           treasuryMint: treasuryMint.publicKey,
-          rewardDest: playerRewardDest.address,
+          rewardDest: playerRewardDest,
           tokenProgram,
+          associatedTokenProgram,
+          systemProgram,
+          rent,
+        },
+        signers: [playerWallet],
+      });
+    } catch (error) {
+      console.log(error);
+      err = error;
+    }
+    expect(err, "transaction should have failed").to.not.be.null;
+    let playerRewardDestAcct =
+      await treasuryMint.getOrCreateAssociatedAccountInfo(
+        playerWallet.publicKey
+      );
+    console.log(playerRewardDestAcct.amount.toString());
+    expect(playerRewardDestAcct.amount.eqn(50), "player acccount has 50 tokens")
+      .to.be.true;
+  });
+
+  it("rewards after the time has passed", async () => {
+    console.log("sleeping 3 seconds to ensure click is available");
+    await new Promise((resolve) => {
+      setTimeout(resolve, 3000);
+    });
+    let err;
+    try {
+      await program.rpc.doClick({
+        accounts: {
+          owner: playerWallet.publicKey,
+          clicker: playerClicker,
+          treasury,
+          treasuryMintAuthority,
+          treasuryMint: treasuryMint.publicKey,
+          rewardDest: playerRewardDest,
+          tokenProgram,
+          associatedTokenProgram,
+          systemProgram,
+          rent,
         },
         signers: [playerWallet],
       });
@@ -138,10 +174,14 @@ describe("idling", () => {
       err = error;
     }
     expect(err).to.not.be.null;
-    playerRewardDest = await treasuryMint.getOrCreateAssociatedAccountInfo(
-      playerWallet.publicKey
-    );
-    console.log(playerRewardDest.amount.toString());
-    expect(playerRewardDest.amount.eqn(50)).to.be.true;
+    let playerRewardDestAcct =
+      await treasuryMint.getOrCreateAssociatedAccountInfo(
+        playerWallet.publicKey
+      );
+    console.log(playerRewardDestAcct.amount.toString());
+    expect(
+      playerRewardDestAcct.amount.eqn(100),
+      "player account has 100 tokens"
+    ).to.be.true;
   });
 });

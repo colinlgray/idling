@@ -1,18 +1,25 @@
 use anchor_lang::prelude::*;
+use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{mint_to, Mint, MintTo, Token, TokenAccount};
+
+use idle_common::AnchorSize;
 
 use crate::errors::ErrorCode;
 use crate::state::{
-    Clicker, Treasury, CLICK_REWARD, COOLDOWN, MINT_AUTHORITY_PREFIX, TREASURY_PREFIX,
+    Clicker, Treasury, CLICKER_PREFIX, CLICK_REWARD, COOLDOWN, MINT_AUTHORITY_PREFIX,
+    TREASURY_PREFIX,
 };
 
 #[derive(Accounts)]
 pub struct DoClick<'info> {
-    #[account(signer)]
-    pub owner: AccountInfo<'info>,
+    #[account(mut)]
+    pub owner: Signer<'info>,
     #[account(
-      mut,
-      has_one = owner,
+        init_if_needed,
+        payer = owner,
+        space = Clicker::SIZE,
+        seeds = [CLICKER_PREFIX, &owner.key().to_bytes()],
+        bump,
     )]
     pub clicker: Account<'info, Clicker>,
     #[account(
@@ -27,10 +34,19 @@ pub struct DoClick<'info> {
     pub treasury_mint_authority: AccountInfo<'info>,
     #[account(mut)]
     pub treasury_mint: Account<'info, Mint>,
-    #[account(mut)]
+
+    #[account(
+        init_if_needed,
+        associated_token::mint = treasury_mint,
+        associated_token::authority = owner,
+        payer = owner,
+    )]
     pub reward_dest: Account<'info, TokenAccount>,
 
     pub token_program: Program<'info, Token>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub system_program: Program<'info, System>,
+    pub rent: Sysvar<'info, Rent>,
 }
 
 impl<'info> DoClick<'info> {
@@ -47,18 +63,29 @@ impl<'info> DoClick<'info> {
 }
 
 pub fn handler(ctx: Context<DoClick>) -> ProgramResult {
+    let owner = &ctx.accounts.owner;
     let clicker = &mut ctx.accounts.clicker;
     let treasury = &ctx.accounts.treasury;
-
     let now = Clock::get()?.unix_timestamp;
-    let elapsed = now.saturating_sub(clicker.last_redeemed);
 
-    if elapsed < COOLDOWN {
-        msg!("Attempted to claim rewards too quickly");
-        return Err(ErrorCode::ClickNotReady.into());
+    if !clicker.is_initialized {
+        clicker.owner = ctx.accounts.owner.key();
+        clicker.last_redeemed = now;
+        clicker.is_initialized = true;
+    } else {
+        if clicker.owner != owner.key() {
+            return Err(ErrorCode::InvalidClickerOwner.into());
+        }
+
+        let elapsed = now.saturating_sub(clicker.last_redeemed);
+
+        if elapsed < COOLDOWN {
+            msg!("Attempted to claim rewards too quickly");
+            return Err(ErrorCode::ClickNotReady.into());
+        }
+
+        clicker.last_redeemed = now;
     }
-
-    clicker.last_redeemed = now;
 
     mint_to(
         ctx.accounts
