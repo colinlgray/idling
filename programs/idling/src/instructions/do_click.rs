@@ -85,14 +85,13 @@ pub fn handler(ctx: Context<DoClick>) -> ProgramResult {
         }
 
         clicker.last_redeemed = now;
+        mint_to(
+            ctx.accounts
+                .grant_reward_context()
+                .with_signer(&[&treasury.authority_seeds()]),
+            CLICK_REWARD,
+        )?;
     }
-
-    mint_to(
-        ctx.accounts
-            .grant_reward_context()
-            .with_signer(&[&treasury.authority_seeds()]),
-        CLICK_REWARD,
-    )?;
 
     Ok(())
 }

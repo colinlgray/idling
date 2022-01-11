@@ -91,7 +91,7 @@ describe("idling", () => {
     });
   });
 
-  it("grants the rewards for a player click", async () => {
+  it("creates the player accounts on the first click", async () => {
     await program.rpc.doClick({
       accounts: {
         owner: playerWallet.publicKey,
@@ -111,8 +111,8 @@ describe("idling", () => {
       await treasuryMint.getOrCreateAssociatedAccountInfo(
         playerWallet.publicKey
       );
-    expect(playerRewardDestAcct.amount.eqn(50), "player account has 50 tokens")
-      .to.be.true;
+    expect(playerRewardDestAcct.amount.eqn(0), "player account has 0 tokens").to
+      .be.true;
   });
 
   it("prevents rewards from being claimed too quickly", async () => {
@@ -143,7 +143,7 @@ describe("idling", () => {
         playerWallet.publicKey
       );
     console.log(playerRewardDestAcct.amount.toString());
-    expect(playerRewardDestAcct.amount.eqn(50), "player acccount has 50 tokens")
+    expect(playerRewardDestAcct.amount.eqn(0), "player acccount has 0 tokens")
       .to.be.true;
   });
 
@@ -179,9 +179,7 @@ describe("idling", () => {
         playerWallet.publicKey
       );
     console.log(playerRewardDestAcct.amount.toString());
-    expect(
-      playerRewardDestAcct.amount.eqn(100),
-      "player account has 100 tokens"
-    ).to.be.true;
+    expect(playerRewardDestAcct.amount.eqn(50), "player account has 50 tokens")
+      .to.be.true;
   });
 });
