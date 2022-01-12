@@ -20,9 +20,6 @@ export function Router() {
   const { publicKey } = useWallet();
   const { connection } = useConnection();
   const notify = useNotify();
-  const [unstakeCount, setUnstakeCount] = useState<number>(0);
-  // Calculation for pending rewards is fuzzy, when justClaimed show 0 pending
-  const [justClaimed, setJustClaimed] = useState<boolean>(false);
 
   const walletNotConnected = !publicKey;
   const nftsUndefined = walletNfts === undefined;

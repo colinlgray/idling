@@ -2,6 +2,7 @@ import { FC } from "react";
 import { NFTRow } from "./NFTRow";
 import { programs } from "@metaplex/js";
 import { UpdateFuncProps } from "./Router";
+import { MintButton } from "../components";
 const headerClassName = "text-xl font-bold border-b-2 mb-6 py-2";
 interface Props {
   walletNfts: programs.metadata.Metadata[];
@@ -9,15 +10,7 @@ interface Props {
 }
 export const StakingInterface: FC<Props> = ({ walletNfts, onNftUpdated }) => {
   if (walletNfts.length === 0) {
-    return (
-      <div>
-        It looks like you don't have any NFTs. You can purchase them on
-        the&nbsp;
-        <a className="underline" href="https://digitaleyes.market">
-          secondary market
-        </a>
-      </div>
-    );
+    return <MintButton />;
   }
 
   return (

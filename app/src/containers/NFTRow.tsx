@@ -43,7 +43,9 @@ export const NFTRow: FC<RowProps> = (props) => {
         <div className="flex items-center">
           <img alt="nft" className="h-24 p-4" src={metadata.image} />
           <div className="w-24 flex justify-center">
-            <button>Water</button>
+            <button className="bg-green-500 hover:bg-green-700 font-bold py-1 px-2 rounded">
+              ???
+            </button>
           </div>
         </div>
       </div>
