@@ -1,14 +1,10 @@
 import { programs } from "@metaplex/js";
 import axios from "axios";
 import { FC, useEffect, useState } from "react";
-import { Spinner, StakeButton } from "../components";
-import { RewarderAccount } from "../hooks/useRewarder";
-import { StakeAccount } from "../hooks/useStakeAccount";
+import { Spinner } from "../components";
 
 export interface RowProps {
   nft: programs.metadata.Metadata;
-  rewarder?: RewarderAccount | null;
-  stakeAccount?: StakeAccount | null;
   isStaked: boolean;
   onChange: (nft: programs.metadata.Metadata) => void;
 }
@@ -47,7 +43,7 @@ export const NFTRow: FC<RowProps> = (props) => {
         <div className="flex items-center">
           <img alt="nft" className="h-24 p-4" src={metadata.image} />
           <div className="w-24 flex justify-center">
-            <StakeButton {...props} onChange={props.onChange} />
+            <button>Water</button>
           </div>
         </div>
       </div>

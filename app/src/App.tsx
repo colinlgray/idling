@@ -13,10 +13,10 @@ function App() {
         <WalletConnectionProvider>
           <WalletModalProvider>
             <header className="flex justify-between items-center">
+              <div className="font-bold text-3xl select-none p-4 px-12"></div>
               <div className="font-bold text-3xl select-none p-4 px-12">
                 Idling
               </div>
-              <div className="font-bold">staking</div>
               <div className="px-12">
                 <WalletMultiButton />
               </div>
