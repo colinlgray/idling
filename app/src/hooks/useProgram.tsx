@@ -2,15 +2,16 @@ import { Idl, Program, Provider } from "@project-serum/anchor";
 import { useConnection, useAnchorWallet } from "@solana/wallet-adapter-react";
 import { ConfirmOptions, PublicKey } from "@solana/web3.js";
 import { useMemo } from "react";
-import idl from "../idl.json";
+import idl from "../idl/idling.json";
 
 const opts: ConfirmOptions = {
   preflightCommitment: "processed",
 };
 
-// LocalHost program id: GS4dQdangqbtGJDJecgGscv6m5wmq7wYC6Q8DzCWXMxh
+// LocalHost program id:
+const localProgramId = "GS4dQdangqbtGJDJecgGscv6m5wmq7wYC6Q8DzCWXMxh";
 
-const programId = new PublicKey("3zPPaZhN3tAkSJhjcEcyT7kAM6b2stQmJf65Fw9sMZa3");
+const programId = new PublicKey(localProgramId);
 export function useProgram() {
   const wallet = useAnchorWallet();
   const { connection } = useConnection();
