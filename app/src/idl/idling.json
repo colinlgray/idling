@@ -54,7 +54,7 @@
       "accounts": [
         {
           "name": "owner",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true
         },
         {
@@ -86,6 +86,21 @@
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": []
@@ -104,6 +119,10 @@
           {
             "name": "lastRedeemed",
             "type": "i64"
+          },
+          {
+            "name": "isInitialized",
+            "type": "bool"
           }
         ]
       }
@@ -148,6 +167,11 @@
       "code": 6001,
       "name": "ClickNotReady",
       "msg": "Not enough time has passed to perform a click"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidClickerOwner",
+      "msg": "The provider clicker was not owned by the signer"
     }
   ]
 }

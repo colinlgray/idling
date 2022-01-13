@@ -57,4 +57,26 @@
 //     },
 //     signers: [playerWallet],
 //   });
-export {};
+
+export async function doClick() {
+  // await program.rpc.doClick({
+  //     accounts: {
+  //       owner: playerWallet.publicKey,
+  //       clicker: playerClicker,
+  //       treasury,
+  //       treasuryMintAuthority,
+  //       treasuryMint: treasuryMint.publicKey,
+  //       rewardDest: playerRewardDest,
+  //       tokenProgram,
+  //       systemProgram,
+  //       associatedTokenProgram,
+  //       rent,
+  //     },
+  //     signers: [playerWallet],
+  //   });
+  //   let playerRewardDestAcct =
+  //     await treasuryMint.getOrCreateAssociatedAccountInfo(
+  //       playerWallet.publicKey
+  //     );
+  return null;
+}
