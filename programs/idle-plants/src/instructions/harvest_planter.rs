@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{mint_to, Mint, MintTo, Token, TokenAccount};
 use idle_common::random;
 
@@ -28,13 +29,17 @@ pub struct HarvestPlanter<'info> {
 
     /// The account to mint the plant tokens to
     #[account(
-      mut,
-      constraint = harvest_dest.mint == plant.mint.key() @ IdlePlantsError::InvalidPlantTokenAccount,
-      constraint = harvest_dest.owner == owner.key() @ IdlePlantsError::PlantTokenAccountNotOwned
+        init_if_needed,
+        associated_token::mint = plant_mint,
+        associated_token::authority = owner,
+        payer = owner,
     )]
     pub harvest_dest: Account<'info, TokenAccount>,
 
     pub token_program: Program<'info, Token>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub system_program: Program<'info, System>,
+    pub rent: Sysvar<'info, Rent>,
 }
 
 impl<'info> HarvestPlanter<'info> {

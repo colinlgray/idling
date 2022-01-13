@@ -7,4 +7,7 @@ pub enum ErrorCode {
 
     #[msg("Not enough time has passed to perform a click")]
     ClickNotReady,
+
+    #[msg("The provider clicker was not owned by the signer")]
+    InvalidClickerOwner,
 }
