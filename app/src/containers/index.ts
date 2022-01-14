@@ -1,3 +1,3 @@
 export { NFTRow } from "./NFTRow";
-export { StakingInterface } from "./StakingInterface";
+export { ClickerInterface } from "./ClickerInterface";
 export { Router } from "./Router";

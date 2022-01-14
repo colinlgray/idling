@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletNfts, useNotify } from "../hooks";
-import { StakingInterface } from "../containers";
+import { ClickerInterface } from "../containers";
 import { Spinner } from "../components";
 import { programs } from "@metaplex/js";
 import {
@@ -22,7 +22,6 @@ export function Router() {
   const notify = useNotify();
 
   const walletNotConnected = !publicKey;
-  const nftsUndefined = walletNfts === undefined;
   // console.log("stake account", stakeAccount?.data?.lastClaimed?.toPrecision());
 
   return (
@@ -32,15 +31,9 @@ export function Router() {
           Please connect your wallet
         </div>
       )}
-      {publicKey && nftsUndefined && (
-        <div className="border-2 rounded p-12 mx-24 my-6 flex items-center">
-          <div className="pr-6">{"Loading... < 1 min remaining"}</div>
-          <Spinner />
-        </div>
-      )}
-      {publicKey && !nftsUndefined && (
+      {publicKey && (
         <div className="border-2 rounded p-12 mx-24 my-6">
-          <StakingInterface walletNfts={walletNfts} onNftUpdated={() => {}} />
+          <ClickerInterface />
         </div>
       )}
     </div>
