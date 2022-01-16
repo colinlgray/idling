@@ -18,8 +18,8 @@ pub struct BeginGrowing<'info> {
     )]
     pub planter: Account<'info, Planter>,
     /// The owner of the clicker
-    #[account(mut, signer)]
-    pub owner: AccountInfo<'info>,
+    #[account(mut)]
+    pub owner: Signer<'info>,
     /// The plant being planted
     pub plant: Account<'info, Plant>,
 
@@ -40,6 +40,7 @@ pub struct BeginGrowing<'info> {
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
+    pub rent: Sysvar<'info, Rent>,
 }
 
 impl<'info> BeginGrowing<'info> {

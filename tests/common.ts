@@ -20,3 +20,9 @@ export const airdrop = async (address: web3.PublicKey, amount: number) => {
     "confirmed"
   );
 };
+
+export const sleep = (timeout: number) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, timeout);
+  });
+};

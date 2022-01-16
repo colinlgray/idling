@@ -13,8 +13,8 @@ declare_id!("4H8FuFgabDNba1S8KPLjcni2zBGV2GK8DeffDwtU535f");
 pub mod idle_plants {
     use super::*;
 
-    pub fn init_plant(ctx: Context<InitPlant>, data: PlantData) -> ProgramResult {
-        instructions::init_plant::handler(ctx, data)
+    pub fn init_plant(ctx: Context<InitPlant>, plant_bump: u8, data: PlantData) -> ProgramResult {
+        instructions::init_plant::handler(ctx, plant_bump, data)
     }
 
     pub fn begin_growing(ctx: Context<BeginGrowing>) -> ProgramResult {

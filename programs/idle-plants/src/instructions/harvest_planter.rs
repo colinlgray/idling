@@ -5,7 +5,7 @@ use idle_common::random;
 
 use crate::errors::IdlePlantsError;
 use crate::id;
-use crate::state::{Plant, Planter, PLANTER_PREFIX};
+use crate::state::{Plant, Planter, PLANTER_PREFIX, PLANT_PREFIX};
 
 #[derive(Accounts)]
 pub struct HarvestPlanter<'info> {
@@ -19,8 +19,8 @@ pub struct HarvestPlanter<'info> {
     )]
     pub planter: Account<'info, Planter>,
     /// The owner of the planter
-    #[account(mut, signer)]
-    pub owner: AccountInfo<'info>,
+    #[account(mut)]
+    pub owner: Signer<'info>,
     /// The plant being harvested
     pub plant: Account<'info, Plant>,
     /// The mint for the plant
@@ -89,11 +89,17 @@ pub fn handler(ctx: Context<HarvestPlanter>) -> ProgramResult {
             &now.to_le_bytes(),
             &planter.created_at.to_le_bytes(),
         ],
-        plant.data.min_growth,
         plant.data.max_growth,
     );
 
-    mint_to(ctx.accounts.mint_harvest_ctx(), rewards)?;
+    mint_to(
+        ctx.accounts.mint_harvest_ctx().with_signer(&[&[
+            PLANT_PREFIX.as_ref(),
+            &plant.mint.to_bytes(),
+            &[plant.bump][..],
+        ]]),
+        rewards,
+    )?;
 
     Ok(())
 }
