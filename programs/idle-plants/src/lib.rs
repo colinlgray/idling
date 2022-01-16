@@ -7,7 +7,7 @@ mod state;
 use instructions::*;
 use state::PlantData;
 
-declare_id!("5Xooq9NawThiYdisrAgc6oyPkesS4VbGM6YTw66pVXPj");
+declare_id!("4H8FuFgabDNba1S8KPLjcni2zBGV2GK8DeffDwtU535f");
 
 #[program]
 pub mod idle_plants {

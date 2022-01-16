@@ -3,6 +3,7 @@ import { Program, web3 } from "@project-serum/anchor";
 import { Idling } from "../target/types/idling";
 import * as splToken from "@solana/spl-token";
 import { expect } from "chai";
+import { treasuryKeypair, airdrop } from "./common";
 
 const systemProgram = web3.SystemProgram.programId;
 const tokenProgram = splToken.TOKEN_PROGRAM_ID;
@@ -10,25 +11,9 @@ const associatedTokenProgram = splToken.ASSOCIATED_TOKEN_PROGRAM_ID;
 const rent = web3.SYSVAR_RENT_PUBKEY;
 
 describe("idling", () => {
-  const treasuryAuthority = web3.Keypair.generate();
+  const treasuryAuthority = treasuryKeypair;
 
   let provider = anchor.Provider.env();
-  provider = new anchor.Provider(
-    provider.connection,
-    new anchor.Wallet(treasuryAuthority),
-    provider.opts
-  );
-  anchor.setProvider(provider);
-
-  const airdrop = async (address: web3.PublicKey, amount: number) => {
-    await provider.connection.confirmTransaction(
-      await provider.connection.requestAirdrop(
-        address,
-        amount * web3.LAMPORTS_PER_SOL
-      ),
-      "confirmed"
-    );
-  };
 
   const program = anchor.workspace.Idling as Program<Idling>;
 
@@ -69,10 +54,6 @@ describe("idling", () => {
       treasuryMint.publicKey,
       playerWallet.publicKey
     );
-
-    // playerRewardDest = await treasuryMint.getOrCreateAssociatedAccountInfo(
-    //   playerWallet.publicKey
-    // );
 
     [playerClicker] = await web3.PublicKey.findProgramAddress(
       [Buffer.from("clicker"), playerWallet.publicKey.toBuffer()],
@@ -181,5 +162,11 @@ describe("idling", () => {
     console.log(playerRewardDestAcct.amount.toString());
     expect(playerRewardDestAcct.amount.eqn(50), "player account has 50 tokens")
       .to.be.true;
+  });
+});
+
+describe("idle-plants", () => {
+  it("does the thing", async () => {
+    expect(true).to.be.true;
   });
 });
