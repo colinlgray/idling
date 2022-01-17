@@ -3,55 +3,48 @@ import { Program, web3 } from "@project-serum/anchor";
 import { Idling } from "../target/types/idling";
 import * as splToken from "@solana/spl-token";
 import { expect } from "chai";
+import { treasuryKeypair, airdrop, sleep } from "./common";
+import { IdlePlants } from "../target/types/idle_plants";
 
 const systemProgram = web3.SystemProgram.programId;
 const tokenProgram = splToken.TOKEN_PROGRAM_ID;
 const associatedTokenProgram = splToken.ASSOCIATED_TOKEN_PROGRAM_ID;
 const rent = web3.SYSVAR_RENT_PUBKEY;
 
+const idling = anchor.workspace.Idling as Program<Idling>;
+const idlePlants = anchor.workspace.IdlePlants as Program<IdlePlants>;
+
+const treasuryAuthority = treasuryKeypair;
+let provider = anchor.Provider.env();
+
+let treasury: web3.PublicKey;
+let treasuryMintAuthority: web3.PublicKey;
+let treasuryMint: splToken.Token;
+
+const playerWallet = web3.Keypair.generate();
+let playerClicker: web3.PublicKey;
+let playerRewardDest: web3.PublicKey;
+let playerTestPlantPlanter: web3.PublicKey;
+let playerTestPlantRewardDest: web3.PublicKey;
+
+const testPlantMintKeypair = web3.Keypair.generate();
+let testPlantMint: splToken.Token;
+let testPlant: web3.PublicKey;
+let testPlantBump: number;
+
 describe("idling", () => {
-  const treasuryAuthority = web3.Keypair.generate();
-
-  let provider = anchor.Provider.env();
-  provider = new anchor.Provider(
-    provider.connection,
-    new anchor.Wallet(treasuryAuthority),
-    provider.opts
-  );
-  anchor.setProvider(provider);
-
-  const airdrop = async (address: web3.PublicKey, amount: number) => {
-    await provider.connection.confirmTransaction(
-      await provider.connection.requestAirdrop(
-        address,
-        amount * web3.LAMPORTS_PER_SOL
-      ),
-      "confirmed"
-    );
-  };
-
-  const program = anchor.workspace.Idling as Program<Idling>;
-
-  let treasury: web3.PublicKey;
-  let treasuryMintAuthority: web3.PublicKey;
-  let treasuryMint: splToken.Token;
-
-  const playerWallet = web3.Keypair.generate();
-  let playerClicker: web3.PublicKey;
-  let playerRewardDest: web3.PublicKey;
-
   before(async () => {
     await airdrop(treasuryAuthority.publicKey, 10);
     await airdrop(playerWallet.publicKey, 10);
 
     [treasury] = await web3.PublicKey.findProgramAddress(
       [Buffer.from("treasury")],
-      program.programId
+      idling.programId
     );
 
     [treasuryMintAuthority] = await web3.PublicKey.findProgramAddress(
       [Buffer.from("treasury"), Buffer.from("mint")],
-      program.programId
+      idling.programId
     );
 
     treasuryMint = await splToken.Token.createMint(
@@ -70,18 +63,14 @@ describe("idling", () => {
       playerWallet.publicKey
     );
 
-    // playerRewardDest = await treasuryMint.getOrCreateAssociatedAccountInfo(
-    //   playerWallet.publicKey
-    // );
-
     [playerClicker] = await web3.PublicKey.findProgramAddress(
       [Buffer.from("clicker"), playerWallet.publicKey.toBuffer()],
-      program.programId
+      idling.programId
     );
   });
 
   it("Initializes the treasury", async () => {
-    await program.rpc.initTreasury({
+    await idling.rpc.initTreasury({
       accounts: {
         treasury,
         mint: treasuryMint.publicKey,
@@ -92,7 +81,7 @@ describe("idling", () => {
   });
 
   it("creates the player accounts on the first click", async () => {
-    await program.rpc.doClick({
+    await idling.rpc.doClick({
       accounts: {
         owner: playerWallet.publicKey,
         clicker: playerClicker,
@@ -118,7 +107,7 @@ describe("idling", () => {
   it("prevents rewards from being claimed too quickly", async () => {
     let err;
     try {
-      await program.rpc.doClick({
+      await idling.rpc.doClick({
         accounts: {
           owner: playerWallet.publicKey,
           clicker: playerClicker,
@@ -149,12 +138,10 @@ describe("idling", () => {
 
   it("rewards after the time has passed", async () => {
     console.log("sleeping 3 seconds to ensure click is available");
-    await new Promise((resolve) => {
-      setTimeout(resolve, 3000);
-    });
+    await sleep(3000);
     let err;
     try {
-      await program.rpc.doClick({
+      await idling.rpc.doClick({
         accounts: {
           owner: playerWallet.publicKey,
           clicker: playerClicker,
@@ -181,5 +168,189 @@ describe("idling", () => {
     console.log(playerRewardDestAcct.amount.toString());
     expect(playerRewardDestAcct.amount.eqn(50), "player account has 50 tokens")
       .to.be.true;
+  });
+});
+
+describe("idle-plants", () => {
+  const plantData = {
+    maxGrowth: new anchor.BN(20),
+    requiredWaterings: 1,
+    timeTillThirsty: new anchor.BN(2),
+    cost: new anchor.BN(50),
+  };
+
+  before(async () => {
+    [testPlant, testPlantBump] = await web3.PublicKey.findProgramAddress(
+      [Buffer.from("plant"), testPlantMintKeypair.publicKey.toBuffer()],
+      idlePlants.programId
+    );
+
+    [playerTestPlantPlanter] = await web3.PublicKey.findProgramAddress(
+      [
+        Buffer.from("planter"),
+        testPlant.toBuffer(),
+        playerWallet.publicKey.toBuffer(),
+      ],
+      idlePlants.programId
+    );
+
+    playerTestPlantRewardDest = await splToken.Token.getAssociatedTokenAddress(
+      splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
+      splToken.TOKEN_PROGRAM_ID,
+      testPlantMintKeypair.publicKey,
+      playerWallet.publicKey
+    );
+
+    testPlantMint = new splToken.Token(
+      provider.connection,
+      testPlantMintKeypair.publicKey,
+      splToken.TOKEN_PROGRAM_ID,
+      playerWallet
+    );
+  });
+
+  it("creates a plant", async () => {
+    await idlePlants.rpc.initPlant(testPlantBump, plantData, {
+      accounts: {
+        plant: testPlant,
+        plantMint: testPlantMintKeypair.publicKey,
+        treasury: treasury,
+        authority: treasuryAuthority.publicKey,
+        systemProgram,
+        tokenProgram,
+        rent,
+      },
+      signers: [testPlantMintKeypair, treasuryAuthority],
+    });
+  });
+
+  it("begins growing the test plant", async () => {
+    let tx = await idlePlants.rpc.beginGrowing({
+      accounts: {
+        planter: playerTestPlantPlanter,
+        owner: playerWallet.publicKey,
+        plant: testPlant,
+        treasury,
+        treasuryMint: treasuryMint.publicKey,
+        treasuryTokens: playerRewardDest,
+        tokenProgram,
+        systemProgram,
+        rent,
+      },
+      signers: [playerWallet],
+    });
+
+    await provider.connection.confirmTransaction(tx, "confirmed");
+
+    //expect the 50 tokens to be withdrawn from the player
+    let playerRewardDestAcct =
+      await treasuryMint.getOrCreateAssociatedAccountInfo(
+        playerWallet.publicKey
+      );
+    console.log(
+      "balance after planting",
+      playerRewardDestAcct.amount.toString()
+    );
+    expect(playerRewardDestAcct.amount.eqn(0), "player account has 0 tokens").to
+      .be.true;
+  });
+
+  it("prevents immediate watering", async () => {
+    let err;
+    try {
+      await idlePlants.rpc.waterPlanter({
+        accounts: {
+          planter: playerTestPlantPlanter,
+          plant: testPlant,
+          owner: playerWallet.publicKey,
+        },
+        signers: [playerWallet],
+      });
+    } catch (error) {
+      console.log(error);
+      err = error;
+    }
+    expect(err, "expected watering error").to.not.be.null;
+  });
+
+  it("prevents harvesting before fully watered", async () => {
+    let err;
+    try {
+      await idlePlants.rpc.harvestPlanter({
+        accounts: {
+          planter: playerTestPlantPlanter,
+          owner: playerWallet.publicKey,
+          plant: testPlant,
+          plantMint: testPlantMintKeypair.publicKey,
+          harvestDest: playerTestPlantRewardDest,
+          tokenProgram,
+          associatedTokenProgram,
+          systemProgram,
+          rent,
+        },
+        signers: [playerWallet],
+      });
+    } catch (error) {
+      console.log(error);
+      err = error;
+    }
+    expect(err, "expected harvesting error").to.not.be.null;
+  });
+
+  it("allows watering after time till thirsty has passed", async () => {
+    console.log("sleeping 3 seconds to ensure watering is available");
+    await sleep(3000);
+
+    let tx = await idlePlants.rpc.waterPlanter({
+      accounts: {
+        planter: playerTestPlantPlanter,
+        plant: testPlant,
+        owner: playerWallet.publicKey,
+      },
+      signers: [playerWallet],
+    });
+
+    await provider.connection.confirmTransaction(tx, "confirmed");
+
+    let planter = await idlePlants.account.planter.fetch(
+      playerTestPlantPlanter
+    );
+    expect(planter.timesWatered).to.equal(1);
+  });
+
+  it("harvests the plant after time till thirsty has passed since fully watered", async () => {
+    console.log("sleeping 3 seconds to ensure harvesting is available");
+    await sleep(3000);
+
+    let tx = await idlePlants.rpc.harvestPlanter({
+      accounts: {
+        planter: playerTestPlantPlanter,
+        owner: playerWallet.publicKey,
+        plant: testPlant,
+        plantMint: testPlantMintKeypair.publicKey,
+        harvestDest: playerTestPlantRewardDest,
+        tokenProgram,
+        associatedTokenProgram,
+        systemProgram,
+        rent,
+      },
+      signers: [playerWallet],
+    });
+    await provider.connection.confirmTransaction(tx, "confirmed");
+
+    //planter should be closed to get rent back
+    let planter = await idlePlants.account.planter.fetchNullable(
+      playerTestPlantPlanter
+    );
+    expect(planter).to.be.null;
+
+    let playerPlantAcct = await testPlantMint.getOrCreateAssociatedAccountInfo(
+      playerWallet.publicKey
+    );
+    console.log("balance after harvest", playerPlantAcct.amount.toString());
+    expect(
+      playerPlantAcct.amount.lte(plantData.maxGrowth),
+      "harvest to be <= maxGrowth"
+    ).to.be.true;
   });
 });

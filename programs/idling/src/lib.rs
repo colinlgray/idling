@@ -5,7 +5,7 @@ pub mod errors;
 pub mod instructions;
 pub mod state;
 
-declare_id!("EstAWeDWJtzCpkvx5SyeykQFoyaQ5hDBAb57a8fhpVef");
+declare_id!("3gTqaTAKfq6h41XDSFb2iUZt8bXFKTpbU3nsxbBzipcN");
 
 #[program]
 pub mod idling {
