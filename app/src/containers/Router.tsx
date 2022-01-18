@@ -1,14 +1,6 @@
-import { useState } from "react";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { useWalletNfts, useNotify } from "../hooks";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { ClickerInterface } from "../containers";
-import { Spinner } from "../components";
 import { programs } from "@metaplex/js";
-import {
-  Token,
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
 
 export interface UpdateFuncProps {
   previousLocation: "wallet" | "staked";
@@ -16,13 +8,9 @@ export interface UpdateFuncProps {
 }
 
 export function Router() {
-  const [walletNfts] = useWalletNfts();
   const { publicKey } = useWallet();
-  const { connection } = useConnection();
-  const notify = useNotify();
 
   const walletNotConnected = !publicKey;
-  // console.log("stake account", stakeAccount?.data?.lastClaimed?.toPrecision());
 
   return (
     <div className="max-w-4xl m-auto">

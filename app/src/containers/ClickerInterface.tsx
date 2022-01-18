@@ -1,73 +1,89 @@
 import { FC } from "react";
-import { useProgram } from "../hooks";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { Program, web3 } from "@project-serum/anchor";
-import * as SplToken from "@solana/spl-token";
+import { useProgram, useNotify } from "../hooks";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { web3 } from "@project-serum/anchor";
+import * as splToken from "@solana/spl-token";
+import { PublicKey } from "@solana/web3.js";
+
+const associatedTokenProgram = splToken.ASSOCIATED_TOKEN_PROGRAM_ID;
+const tokenProgram = splToken.TOKEN_PROGRAM_ID;
+const systemProgram = web3.SystemProgram.programId;
+const rent = web3.SYSVAR_RENT_PUBKEY;
+
+interface AccountData {
+  authority: PublicKey;
+  mintAuthority: PublicKey;
+  mint: PublicKey;
+  mintAuthorityBump: number;
+}
 
 interface Props {}
 export const ClickerInterface: FC<Props> = () => {
   const program = useProgram();
   const { publicKey } = useWallet();
-  (window as any).asd = program?.account.treasury;
 
+  const notify = useNotify();
   const handleClick = async () => {
-    if (!program || !publicKey) {
-      throw new Error("Program does not exist");
-    }
-    const [treasury] = await web3.PublicKey.findProgramAddress(
-      [Buffer.from("treasury")],
-      program.programId
-    );
+    try {
+      if (!program || !publicKey) {
+        throw new Error("Program does not exist");
+      }
+      const [treasury] = await web3.PublicKey.findProgramAddress(
+        [Buffer.from("treasury")],
+        program.programId
+      );
 
-    const [treasuryMintAuthority, treasuryMintAuthorityBump] =
-      await web3.PublicKey.findProgramAddress(
+      const [treasuryMintAuthority] = await web3.PublicKey.findProgramAddress(
         [Buffer.from("treasury"), Buffer.from("mint")],
         program.programId
       );
-    if (program?.account.treasury) {
-      const data = await program.account.treasury.fetchNullable(treasury);
-      console.log("data", data);
+      let data: null | AccountData = null;
+      if (program?.account.treasury) {
+        data = (await program.account.treasury.fetchNullable(
+          treasury
+        )) as AccountData;
+      }
+      if (!data) {
+        throw new Error("Unable to gather metadata");
+      }
+
+      const playerRewardDest = await splToken.Token.getAssociatedTokenAddress(
+        associatedTokenProgram,
+        tokenProgram,
+        data.mint,
+        publicKey
+      );
+
+      const [playerClicker] = await web3.PublicKey.findProgramAddress(
+        [Buffer.from("clicker"), publicKey.toBuffer()],
+        program.programId
+      );
+
+      await program.rpc.doClick({
+        accounts: {
+          owner: publicKey,
+          clicker: playerClicker,
+          treasury,
+          treasuryMintAuthority,
+          treasuryMint: data.mint,
+          rewardDest: playerRewardDest,
+          tokenProgram,
+          systemProgram,
+          associatedTokenProgram,
+          rent,
+        },
+      });
+
+      notify("success", "SUCCESS!");
+    } catch (e) {
+      if ((e as any).message) {
+        notify("error", `${(e as any).message}`);
+      } else {
+        notify("error", "something went wrong");
+      }
     }
-    //   treasuryMint = await splToken.Token.createMint(
-    //     provider.connection,
-    //     treasuryAuthority,
-    //     treasuryMintAuthority,
-    //     null,
-    //     3,
-    //     splToken.TOKEN_PROGRAM_ID
-    //   );
-
-    // playerRewardDest = await treasuryMint.getOrCreateAssociatedAccountInfo(
-    //     playerWallet.publicKey
-    //   );
-
-    const [playerClicker] = await web3.PublicKey.findProgramAddress(
-      [Buffer.from("clicker"), publicKey.toBuffer()],
-      program.programId
-    );
-    console.log("playerClicker", playerClicker);
-    console.log("treasury", treasury);
-    console.log("treasuryMintAuthority", treasuryMintAuthority);
-    console.log("treasuryMint");
-    console.log("playerRewardDest");
-    // await program.rpc.doClick({
-    //   accounts: {
-    //     owner: publicKey,
-    //     clicker: playerClicker,
-    //     treasury,
-    //     treasuryMintAuthority,
-    //     treasuryMint: treasuryMint.publicKey,
-    //     rewardDest: playerRewardDest,
-    //     tokenProgram,
-    //     systemProgram,
-    //     associatedTokenProgram,
-    //     rent,
-    //   },
-    // });
-    console.log("done");
   };
 
-  console.log("AHHH", program);
   return (
     <div className="flex justify-center">
       <button
