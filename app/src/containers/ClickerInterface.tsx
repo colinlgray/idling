@@ -1,9 +1,9 @@
 import { FC } from "react";
 import { useProgram, useNotify } from "../hooks";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { web3 } from "@project-serum/anchor";
 import * as splToken from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 
 const associatedTokenProgram = splToken.ASSOCIATED_TOKEN_PROGRAM_ID;
 const tokenProgram = splToken.TOKEN_PROGRAM_ID;
@@ -20,8 +20,10 @@ interface AccountData {
 interface Props {}
 export const ClickerInterface: FC<Props> = () => {
   const program = useProgram();
-  const { publicKey } = useWallet();
+  const { connection } = useConnection();
+  const { publicKey, ...remainingWallet } = useWallet();
 
+  (window as any).as = remainingWallet;
   const notify = useNotify();
   const handleClick = async () => {
     try {
@@ -43,6 +45,7 @@ export const ClickerInterface: FC<Props> = () => {
           treasury
         )) as AccountData;
       }
+      console.log("data", data);
       if (!data) {
         throw new Error("Unable to gather metadata");
       }
@@ -53,27 +56,13 @@ export const ClickerInterface: FC<Props> = () => {
         data.mint,
         publicKey
       );
-
-      const [playerClicker] = await web3.PublicKey.findProgramAddress(
-        [Buffer.from("clicker"), publicKey.toBuffer()],
-        program.programId
-      );
-
-      await program.rpc.doClick({
-        accounts: {
-          owner: publicKey,
-          clicker: playerClicker,
-          treasury,
-          treasuryMintAuthority,
-          treasuryMint: data.mint,
-          rewardDest: playerRewardDest,
-          tokenProgram,
-          systemProgram,
-          associatedTokenProgram,
-          rent,
-        },
-      });
-
+      await program.account.treasury.fetchNullable(playerRewardDest);
+      // const treasuryMint = new splToken.Token(
+      //   connection,
+      //   data.mint,
+      //   splToken.TOKEN_PROGRAM_ID,
+      //   publicKey
+      // );
       notify("success", "SUCCESS!");
     } catch (e) {
       if ((e as any).message) {

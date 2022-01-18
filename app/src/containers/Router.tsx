@@ -1,5 +1,5 @@
 import { useWallet } from "@solana/wallet-adapter-react";
-import { ClickerInterface } from "../containers";
+import { ClickerInterface, PointsDisplay } from "../containers";
 import { programs } from "@metaplex/js";
 
 export interface UpdateFuncProps {
@@ -21,6 +21,7 @@ export function Router() {
       )}
       {publicKey && (
         <div className="border-2 rounded p-12 mx-24 my-6">
+          <PointsDisplay />
           <ClickerInterface />
         </div>
       )}
