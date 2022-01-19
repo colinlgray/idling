@@ -9,6 +9,7 @@ export const TokenDisplay = (props: {
   showBalance?: boolean;
 }) => {
   const { showBalance, mintAddress, name, icon } = props;
+  console.log("using mint", mintAddress);
   const tokenMint = useMint(mintAddress);
   const tokenAccount = useAccountByMint(mintAddress);
 
