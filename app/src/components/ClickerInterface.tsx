@@ -49,12 +49,36 @@ export const ClickerInterface: FC<Props> = () => {
           treasury
         )) as AccountData;
       }
-      console.log("data", data);
       if (!data) {
         throw new Error("Unable to gather metadata");
       }
 
-      // notify("success", "SUCCESS!");
+      const playerRewardDest = await splToken.Token.getAssociatedTokenAddress(
+        associatedTokenProgram,
+        tokenProgram,
+        data.mint,
+        publicKey
+      );
+
+      const [playerClicker] = await web3.PublicKey.findProgramAddress(
+        [Buffer.from("clicker"), publicKey.toBuffer()],
+        program.programId
+      );
+
+      await program.rpc.doClick({
+        accounts: {
+          owner: publicKey,
+          clicker: playerClicker,
+          treasury,
+          treasuryMintAuthority,
+          treasuryMint: data.mint,
+          rewardDest: playerRewardDest,
+          tokenProgram,
+          systemProgram,
+          associatedTokenProgram,
+          rent,
+        },
+      });
       console.log("success");
     } catch (e) {
       if ((e as any).message) {

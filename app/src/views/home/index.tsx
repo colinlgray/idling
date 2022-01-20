@@ -3,6 +3,7 @@ import { Button, Col, Row } from "antd";
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { TokenIcon } from "../../components/TokenIcon";
+import { ClickerInterface } from "../../components/ClickerInterface";
 import { useConnectionConfig } from "../../contexts/connection";
 import { useMarkets } from "../../contexts/market";
 import { useUserBalance, useUserTotalBalance } from "../../hooks";
@@ -43,6 +44,9 @@ export const HomeView = () => {
           <TokenIcon mintAddress={SRM_ADDRESS} /> SRM: {SRM?.balance} (
           {formatUSD.format(SRM?.balanceInUSD)})
         </h2>
+        <div>
+          <ClickerInterface />
+        </div>
       </Col>
 
       <Col span={12}>
