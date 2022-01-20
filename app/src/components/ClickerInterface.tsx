@@ -1,0 +1,80 @@
+import { FC } from "react";
+import { useProgram } from "../hooks/useProgram";
+import { useUserAccounts } from "../hooks";
+import { web3 } from "@project-serum/anchor";
+import * as splToken from "@solana/spl-token";
+import { PublicKey } from "@solana/web3.js";
+import { useConnection } from "../contexts/connection";
+// import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+
+const associatedTokenProgram = splToken.ASSOCIATED_TOKEN_PROGRAM_ID;
+const tokenProgram = splToken.TOKEN_PROGRAM_ID;
+const systemProgram = web3.SystemProgram.programId;
+const rent = web3.SYSVAR_RENT_PUBKEY;
+
+interface AccountData {
+  authority: PublicKey;
+  mintAuthority: PublicKey;
+  mint: PublicKey;
+  mintAuthorityBump: number;
+}
+
+interface Props {}
+export const ClickerInterface: FC<Props> = () => {
+  const program = useProgram();
+  const connection = useConnection();
+  const { userAccounts } = useUserAccounts();
+  const publicKey = userAccounts[0].pubkey;
+  // const { publicKey, ...remainingWallet } = useWallet();
+
+  // (window as any).as = remainingWallet;
+  // const notify = useNotify();
+  const handleClick = async () => {
+    try {
+      if (!program || !publicKey) {
+        throw new Error("Program does not exist");
+      }
+      const [treasury] = await web3.PublicKey.findProgramAddress(
+        [Buffer.from("treasury")],
+        program.programId
+      );
+
+      const [treasuryMintAuthority] = await web3.PublicKey.findProgramAddress(
+        [Buffer.from("treasury"), Buffer.from("mint")],
+        program.programId
+      );
+      let data: null | AccountData = null;
+      if (program?.account.treasury) {
+        data = (await program.account.treasury.fetchNullable(
+          treasury
+        )) as AccountData;
+      }
+      console.log("data", data);
+      if (!data) {
+        throw new Error("Unable to gather metadata");
+      }
+
+      // notify("success", "SUCCESS!");
+      console.log("success");
+    } catch (e) {
+      if ((e as any).message) {
+        // notify("error", `${(e as any).message}`);
+      } else {
+        // notify("error", "something went wrong");
+      }
+    }
+  };
+
+  return (
+    <div className="flex justify-center">
+      <button
+        className="bg-blue-500 hover:bg-blue-700 font-bold py-1 px-2 rounded"
+        onClick={() => {
+          handleClick();
+        }}
+      >
+        ???
+      </button>
+    </div>
+  );
+};

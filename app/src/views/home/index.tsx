@@ -15,6 +15,7 @@ export const HomeView = () => {
   const SRM_ADDRESS = "SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt";
   const SRM = useUserBalance(SRM_ADDRESS);
   const SOL = useUserBalance(WRAPPED_SOL_MINT);
+
   const { balanceInUSD: totalBalanceInUSD } = useUserTotalBalance();
 
   useEffect(() => {
