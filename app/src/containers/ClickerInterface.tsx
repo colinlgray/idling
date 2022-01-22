@@ -1,5 +1,5 @@
-import { FC } from "react";
-import { useProgram, useNotify } from "../hooks";
+import { FC, useState } from "react";
+import { useProgram, useNotify, useMint } from "../hooks";
 import { web3 } from "@project-serum/anchor";
 import * as splToken from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
@@ -22,8 +22,9 @@ export const ClickerInterface: FC<Props> = () => {
   const program = useProgram();
   const { connection } = useConnection();
   const { publicKey, ...remainingWallet } = useWallet();
+  const [mintId, setMintId] = useState();
+  const mint = useMint(mintId);
 
-  (window as any).as = remainingWallet;
   const notify = useNotify();
   const handleClick = async () => {
     try {
@@ -45,7 +46,6 @@ export const ClickerInterface: FC<Props> = () => {
           treasury
         )) as AccountData;
       }
-      console.log("data", data);
       if (!data) {
         throw new Error("Unable to gather metadata");
       }
@@ -56,7 +56,14 @@ export const ClickerInterface: FC<Props> = () => {
         data.mint,
         publicKey
       );
-      await program.account.treasury.fetchNullable(playerRewardDest);
+      const mintData = await connection.getAccountInfo(data.mint);
+      // splToken.MintLayout.
+
+      if (!mintData?.data) {
+        throw new Error("No mint data");
+      }
+      const mintInfo = splToken.MintLayout.decode(mintData.data);
+      // await program.account.treasury.fetchNullable(playerRewardDest);
       // const treasuryMint = new splToken.Token(
       //   connection,
       //   data.mint,
@@ -66,13 +73,13 @@ export const ClickerInterface: FC<Props> = () => {
       notify("success", "SUCCESS!");
     } catch (e) {
       if ((e as any).message) {
+        console.error(e);
         notify("error", `${(e as any).message}`);
       } else {
         notify("error", "something went wrong");
       }
     }
   };
-
   return (
     <div className="flex justify-center">
       <button
