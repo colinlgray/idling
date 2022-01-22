@@ -17,6 +17,44 @@ interface AccountData {
   mintAuthorityBump: number;
 }
 
+const deserializeAccount = (data: Buffer) => {
+  const accountInfo = splToken.AccountLayout.decode(data);
+  accountInfo.mint = new PublicKey(accountInfo.mint);
+  accountInfo.owner = new PublicKey(accountInfo.owner);
+  accountInfo.amount = splToken.u64.fromBuffer(accountInfo.amount);
+
+  if (accountInfo.delegateOption === 0) {
+    accountInfo.delegate = null;
+    accountInfo.delegatedAmount = new splToken.u64(0);
+  } else {
+    accountInfo.delegate = new PublicKey(accountInfo.delegate);
+    accountInfo.delegatedAmount = splToken.u64.fromBuffer(
+      accountInfo.delegatedAmount
+    );
+  }
+
+  accountInfo.isInitialized = accountInfo.state !== 0;
+  accountInfo.isFrozen = accountInfo.state === 2;
+
+  if (accountInfo.isNativeOption === 1) {
+    accountInfo.rentExemptReserve = splToken.u64.fromBuffer(
+      accountInfo.isNative
+    );
+    accountInfo.isNative = true;
+  } else {
+    accountInfo.rentExemptReserve = null;
+    accountInfo.isNative = false;
+  }
+
+  if (accountInfo.closeAuthorityOption === 0) {
+    accountInfo.closeAuthority = null;
+  } else {
+    accountInfo.closeAuthority = new PublicKey(accountInfo.closeAuthority);
+  }
+
+  return accountInfo;
+};
+
 interface Props {}
 export const ClickerInterface: FC<Props> = () => {
   const program = useProgram();
@@ -56,13 +94,40 @@ export const ClickerInterface: FC<Props> = () => {
         data.mint,
         publicKey
       );
+      const [playerClicker] = await web3.PublicKey.findProgramAddress(
+        [Buffer.from("clicker"), publicKey.toBuffer()],
+        program.programId
+      );
+
       const mintData = await connection.getAccountInfo(data.mint);
-      // splToken.MintLayout.
 
       if (!mintData?.data) {
         throw new Error("No mint data");
       }
-      const mintInfo = splToken.MintLayout.decode(mintData.data);
+
+      await program.rpc.doClick({
+        accounts: {
+          owner: publicKey,
+          clicker: playerClicker,
+          treasury,
+          treasuryMintAuthority,
+          treasuryMint: data.mint,
+          rewardDest: playerRewardDest,
+          tokenProgram,
+          systemProgram,
+          associatedTokenProgram,
+          rent,
+        },
+      });
+      // const mintInfo = splToken.MintLayout.decode(mintData.data);
+      // (window as any).asd;
+      const playerDestData = await connection.getAccountInfo(playerRewardDest);
+      if (!playerDestData?.data) {
+        throw new Error("missing data!");
+      }
+      const destData = deserializeAccount(playerDestData.data);
+      console.log("maybe this is the number?", destData.amount.toNumber());
+
       // await program.account.treasury.fetchNullable(playerRewardDest);
       // const treasuryMint = new splToken.Token(
       //   connection,
