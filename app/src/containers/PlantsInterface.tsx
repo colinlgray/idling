@@ -1,0 +1,14 @@
+import { useAddresses } from "../hooks";
+import { useConnection } from "@solana/wallet-adapter-react";
+import { deserializeAccount } from "../common/util";
+import { useEffect, useState, FC } from "react";
+
+interface Props {}
+
+export const PlantsInterface: FC<Props> = (props) => {
+  // Check for plants
+  // If no plant option to create one
+  // otherwise show plant
+
+  return <div className="flex justify-start">Plants</div>;
+};

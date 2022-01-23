@@ -59,6 +59,28 @@ export function useAddresses() {
         [Buffer.from("clicker"), wallet.publicKey.toBuffer()],
         program.programId
       );
+
+      // [testPlant, testPlantBump] = await web3.PublicKey.findProgramAddress(
+      //     [Buffer.from("plant"), testPlantMintKeypair.publicKey.toBuffer()],
+      //     idlePlants.programId
+      //   );
+
+      //   [playerTestPlantPlanter] = await web3.PublicKey.findProgramAddress(
+      //     [
+      //       Buffer.from("planter"),
+      //       testPlant.toBuffer(),
+      //       playerWallet.publicKey.toBuffer(),
+      //     ],
+      //     idlePlants.programId
+      //   );
+
+      //   playerTestPlantRewardDest = await splToken.Token.getAssociatedTokenAddress(
+      //     splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
+      //     splToken.TOKEN_PROGRAM_ID,
+      //     testPlantMintKeypair.publicKey,
+      //     playerWallet.publicKey
+      //   );
+
       setAddresses({
         treasury,
         treasuryMintAuthority,
