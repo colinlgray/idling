@@ -1,8 +1,34 @@
-import { useProgram, useNotify } from "../hooks";
+import { useAddresses } from "../hooks";
+import { useConnection } from "@solana/wallet-adapter-react";
+import { deserializeAccount } from "../common/util";
+import { useEffect, useState, FC } from "react";
 
-export function PointsDisplay() {
-  const program = useProgram();
-  (window as any).asd = program;
-
-  return <div className="flex justify-end">Points: 0</div>;
+interface Props {
+  count: number;
 }
+
+export const PointsDisplay: FC<Props> = (props) => {
+  const { connection } = useConnection();
+  const addresses = useAddresses();
+  const [currentTokens, setCurrentTokens] = useState<null | number>(null);
+
+  useEffect(() => {
+    const requestPoints = async () => {
+      if (!addresses?.playerRewardDest) {
+        return null;
+      }
+      const playerDestData = await connection.getAccountInfo(
+        addresses.playerRewardDest
+      );
+      if (!playerDestData?.data) {
+        throw new Error("missing data!");
+      }
+      const destData = deserializeAccount(playerDestData.data);
+      setCurrentTokens(destData.amount.toNumber());
+    };
+
+    requestPoints();
+  }, [connection, props.count, addresses]);
+
+  return <div className="flex justify-end">Points: {currentTokens}</div>;
+};

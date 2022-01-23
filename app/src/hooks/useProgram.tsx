@@ -7,7 +7,6 @@ import idl from "../idl/idling.json";
 const opts: ConfirmOptions = {
   preflightCommitment: "processed",
 };
-(window as any).asd = idl;
 // LocalHost program id:
 const localProgramId = "3gTqaTAKfq6h41XDSFb2iUZt8bXFKTpbU3nsxbBzipcN";
 

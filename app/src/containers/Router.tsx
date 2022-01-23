@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { ClickerInterface, PointsDisplay } from "../containers";
 import { programs } from "@metaplex/js";
@@ -9,6 +10,7 @@ export interface UpdateFuncProps {
 
 export function Router() {
   const { publicKey } = useWallet();
+  const [count, setCount] = useState(0);
 
   const walletNotConnected = !publicKey;
 
@@ -21,8 +23,12 @@ export function Router() {
       )}
       {publicKey && (
         <div className="border-2 rounded p-12 mx-24 my-6">
-          <PointsDisplay />
-          <ClickerInterface />
+          <PointsDisplay count={count} />
+          <ClickerInterface
+            onClick={() => {
+              setCount(count + 1);
+            }}
+          />
         </div>
       )}
     </div>
