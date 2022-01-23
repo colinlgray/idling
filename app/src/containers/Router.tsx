@@ -1,12 +1,6 @@
 import { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { ClickerInterface, PointsDisplay } from "../containers";
-import { programs } from "@metaplex/js";
-
-export interface UpdateFuncProps {
-  previousLocation: "wallet" | "staked";
-  nftMoved: programs.metadata.Metadata;
-}
 
 export function Router() {
   const { publicKey } = useWallet();

@@ -12,10 +12,8 @@ function App() {
       <SnackbarProvider>
         <WalletConnectionProvider>
           <WalletModalProvider>
-            <header className="flex justify-between items-center">
-              <div className="font-bold text-3xl select-none p-4 px-12"></div>
-              <div className="font-bold text-3xl select-none p-4 px-12"></div>
-              <div className="px-12">
+            <header className="flex justify-end items-center">
+              <div className="px-12 py-2">
                 <WalletMultiButton />
               </div>
             </header>
