@@ -20,11 +20,12 @@ export const PointsDisplay: FC<Props> = (props) => {
       const playerDestData = await connection.getAccountInfo(
         addresses.playerRewardDest
       );
-      if (!playerDestData?.data) {
-        throw new Error("missing data!");
+      if (playerDestData?.data) {
+        const destData = deserializeAccount(playerDestData.data);
+        setCurrentTokens(destData.amount.toNumber());
+      } else {
+        setCurrentTokens(-1);
       }
-      const destData = deserializeAccount(playerDestData.data);
-      setCurrentTokens(destData.amount.toNumber());
     };
 
     requestPoints();

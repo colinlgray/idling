@@ -32,16 +32,16 @@ export function useAddresses() {
       if (!wallet || !program) return;
       const [treasury] = await web3.PublicKey.findProgramAddress(
         [Buffer.from("treasury")],
-        program.programId
+        program.idling.programId
       );
 
       const [treasuryMintAuthority] = await web3.PublicKey.findProgramAddress(
         [Buffer.from("treasury"), Buffer.from("mint")],
-        program.programId
+        program.idling.programId
       );
       let data: null | AccountData = null;
-      if (program?.account.treasury) {
-        data = (await program.account.treasury.fetchNullable(
+      if (program?.idling.account.treasury) {
+        data = (await program.idling.account.treasury.fetchNullable(
           treasury
         )) as AccountData;
       }
@@ -57,7 +57,7 @@ export function useAddresses() {
       );
       const [playerClicker] = await web3.PublicKey.findProgramAddress(
         [Buffer.from("clicker"), wallet.publicKey.toBuffer()],
-        program.programId
+        program.idling.programId
       );
 
       // [testPlant, testPlantBump] = await web3.PublicKey.findProgramAddress(

@@ -23,14 +23,14 @@ export const ClickerInterface: FC<Props> = (props) => {
         throw new Error("Program does not exist");
       }
 
-      const data = await program.account.treasury.fetchNullable(
+      const data = await program.idling.account.treasury.fetchNullable(
         addresses.treasury
       );
       if (!data) {
         throw new Error("Unable to gather metadata");
       }
 
-      await program.rpc.doClick({
+      await program.idling.rpc.doClick({
         accounts: {
           owner: publicKey,
           clicker: addresses.playerClicker,
