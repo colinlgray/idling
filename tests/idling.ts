@@ -3,7 +3,7 @@ import { Program, web3 } from "@project-serum/anchor";
 import { Idling } from "../target/types/idling";
 import * as splToken from "@solana/spl-token";
 import { expect } from "chai";
-import { treasuryKeypair, airdrop, sleep } from "./common";
+import { treasuryKeypair, plantMintKeypair, airdrop, sleep } from "./common";
 import { IdlePlants } from "../target/types/idle_plants";
 
 const systemProgram = web3.SystemProgram.programId;
@@ -27,7 +27,7 @@ let playerRewardDest: web3.PublicKey;
 let playerTestPlantPlanter: web3.PublicKey;
 let playerTestPlantRewardDest: web3.PublicKey;
 
-const testPlantMintKeypair = web3.Keypair.generate();
+const testPlantMintKeypair = plantMintKeypair;
 let testPlantMint: splToken.Token;
 let testPlant: web3.PublicKey;
 let testPlantBump: number;

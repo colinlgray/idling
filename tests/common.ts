@@ -8,6 +8,7 @@ export function loadKeypair(path: string): web3.Keypair {
   );
 }
 
+export const plantMintKeypair = loadKeypair("./plant-mint-keypair.json");
 export const treasuryKeypair = loadKeypair("./testkey.json");
 
 export const airdrop = async (address: web3.PublicKey, amount: number) => {
