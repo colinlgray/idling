@@ -5,18 +5,16 @@ import { web3 } from "@project-serum/anchor";
 import * as splToken from "@solana/spl-token";
 import { useEffect, useState } from "react";
 
-const associatedTokenProgram = splToken.ASSOCIATED_TOKEN_PROGRAM_ID;
-const tokenProgram = splToken.TOKEN_PROGRAM_ID;
-
-interface AccountData {
-  authority: PublicKey;
-  mintAuthority: PublicKey;
-  mint: PublicKey;
-  mintAuthorityBump: number;
-}
+const plantMintPubKey = new web3.PublicKey(
+  "5g9NUc3A8qmez2QS7CNUSbPw7dcKM3zzj1Ld8cX2K1NQ"
+);
 
 interface Addresses {
-  treasury: PublicKey;
+  plantMint: PublicKey;
+  plant: PublicKey;
+  planter: PublicKey;
+  playerPlantRewardDest: PublicKey;
+  plantBump: number;
 }
 
 export function usePlantAddresses() {
@@ -26,14 +24,32 @@ export function usePlantAddresses() {
 
   useEffect(() => {
     const fetchAddresses = async () => {
-      if (!wallet || !program) return;
-      const [treasury] = await web3.PublicKey.findProgramAddress(
-        [Buffer.from("treasury")],
-        program.idling.programId
+      if (!wallet || !program?.idlePlants) return;
+
+      const [plant, plantBump] = await web3.PublicKey.findProgramAddress(
+        [Buffer.from("plant"), plantMintPubKey.toBuffer()],
+        program.idlePlants.programId
       );
 
+      const [playerPlantPlanter] = await web3.PublicKey.findProgramAddress(
+        [Buffer.from("planter"), plant.toBuffer(), wallet.publicKey.toBuffer()],
+        program.idlePlants.programId
+      );
+
+      const playerPlantRewardDest =
+        await splToken.Token.getAssociatedTokenAddress(
+          splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
+          splToken.TOKEN_PROGRAM_ID,
+          plantMintPubKey,
+          wallet.publicKey
+        );
+
       setAddresses({
-        treasury,
+        plantMint: plantMintPubKey,
+        plant,
+        plantBump,
+        planter: playerPlantPlanter,
+        playerPlantRewardDest: playerPlantRewardDest,
       });
     };
 
