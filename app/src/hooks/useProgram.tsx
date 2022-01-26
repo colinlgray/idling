@@ -3,7 +3,7 @@ import { useConnection, useAnchorWallet } from "@solana/wallet-adapter-react";
 import { ConfirmOptions, PublicKey } from "@solana/web3.js";
 import { useMemo } from "react";
 import idl from "../idl/idling.json";
-import plantsIdl from "../idl/idling.json";
+import plantsIdl from "../idl/idle_plants.json";
 
 const opts: ConfirmOptions = {
   preflightCommitment: "processed",

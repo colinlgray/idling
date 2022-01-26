@@ -57,7 +57,7 @@ export const ClickerInterface: FC<Props> = (props) => {
   };
   return (
     <div>
-      <div className="flex justify-center">
+      <div className="flex justify-end">
         <button
           className="bg-blue-500 hover:bg-blue-700 font-bold py-1 px-2 rounded"
           onClick={async () => {
@@ -67,7 +67,7 @@ export const ClickerInterface: FC<Props> = (props) => {
             }
           }}
         >
-          ???
+          Get water
         </button>
       </div>
     </div>
