@@ -1,6 +1,17 @@
-import { usePlantAddresses, useProgram } from "../hooks";
-import { useConnection } from "@solana/wallet-adapter-react";
+import {
+  useAddresses,
+  usePlantAddresses,
+  useProgram,
+  useNotify,
+} from "../hooks";
+import { useConnection, useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useEffect, FC } from "react";
+import * as splToken from "@solana/spl-token";
+import { web3 } from "@project-serum/anchor";
+
+const systemProgram = web3.SystemProgram.programId;
+const tokenProgram = splToken.TOKEN_PROGRAM_ID;
+const rent = web3.SYSVAR_RENT_PUBKEY;
 
 interface Props {
   onClick?: () => void;
@@ -8,53 +19,67 @@ interface Props {
 
 export const PlantsInterface: FC<Props> = (props) => {
   const addresses = usePlantAddresses();
+  const treasuryAddresses = useAddresses();
   const program = useProgram();
   const { connection } = useConnection();
-  (window as any).asd = program;
-  (window as any).asdf = addresses;
+  const notify = useNotify();
+  const playerWallet = useAnchorWallet();
+
   useEffect(() => {
     const fetch = async () => {
-      if (!addresses?.plant) {
-        return;
-      }
-      const data = await connection.getAccountInfo(addresses.plant);
-      const planterData = await connection.getAccountInfo(addresses.planter);
-      const destData = await connection.getAccountInfo(
-        addresses.playerPlantRewardDest
-      );
-      try {
-        console.log("planter address:", addresses.planter.toBase58());
-        let planter = await program?.idlePlants.account.planter.fetch(
-          addresses.planter
-        );
-        console.log("planter", planter);
-      } catch (e) {
-        console.error(e);
-      }
-
-      console.log("data", data);
-      console.log("planterData", planterData);
-      console.log("destData", destData);
+      // if (!addresses?.plant) {
+      //   return;
+      // }
+      // const data = await connection.getAccountInfo(addresses.plant);
+      // const planterData = await connection.getAccountInfo(addresses.planter);
+      // const destData = await connection.getAccountInfo(
+      //   addresses.playerPlantRewardDest
+      // );
+      // try {
+      //   console.log("planter address:", addresses.planter.toBase58());
+      //   let planter = await program?.idlePlants.account.planter.fetch(
+      //     addresses.planter
+      //   );
+      //   console.log("planter", planter);
+      // } catch (e) {
+      //   console.error(e);
+      // }
+      // console.log("data", data);
+      // console.log("planterData", planterData);
+      // console.log("destData", destData);
     };
     fetch();
   }, [addresses, program, connection]);
 
   const handleBeginGrowing = async () => {
-    console.log("click begin");
-    // let tx = await idlePlants.rpc.beginGrowing({
-    //   accounts: {
-    //     planter: playerTestPlantPlanter,
-    //     owner: playerWallet.publicKey,
-    //     plant: testPlant,
-    //     treasury,
-    //     treasuryMint: treasuryMint.publicKey,
-    //     treasuryTokens: playerRewardDest,
-    //     tokenProgram,
-    //     systemProgram,
-    //     rent,
-    //   },
-    //   signers: [playerWallet],
-    // });
+    if (!program || !addresses || !playerWallet || !treasuryAddresses) {
+      throw new Error("Not connected");
+    }
+    try {
+      const args = {
+        planter: addresses.planter,
+        owner: playerWallet.publicKey,
+        plant: addresses.plant,
+        treasury: treasuryAddresses.treasury,
+        treasuryMint: treasuryAddresses.treasuryMint,
+        treasuryTokens: treasuryAddresses.playerRewardDest,
+        tokenProgram,
+        systemProgram,
+        rent,
+      };
+      console.log("args", JSON.stringify(args));
+      let tx = await program.idlePlants.rpc.beginGrowing({
+        accounts: args,
+      });
+      console.log("done!", tx);
+      notify("success", "SUCCESS!");
+    } catch (e) {
+      console.error(e);
+      const errAsAny = e as any;
+      if (errAsAny?.message) {
+        notify("error", errAsAny.message);
+      }
+    }
   };
 
   const handleWatering = async () => {
