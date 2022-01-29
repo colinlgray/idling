@@ -43,6 +43,10 @@
       ],
       "args": [
         {
+          "name": "plantBump",
+          "type": "u8"
+        },
+        {
           "name": "data",
           "type": {
             "defined": "PlantData"
@@ -90,6 +94,11 @@
         },
         {
           "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
           "isMut": false,
           "isSigner": false
         }
@@ -184,6 +193,10 @@
             "type": {
               "defined": "PlantData"
             }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }
@@ -232,10 +245,6 @@
       "type": {
         "kind": "struct",
         "fields": [
-          {
-            "name": "minGrowth",
-            "type": "u64"
-          },
           {
             "name": "maxGrowth",
             "type": "u64"

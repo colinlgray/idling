@@ -67,6 +67,18 @@ export const PlantsInterface: FC<Props> = (props) => {
         systemProgram,
         rent,
       };
+      console.log("planter", addresses.planter.toBase58());
+      console.log("owner", playerWallet.publicKey.toBase58());
+      console.log("plant", addresses.plant.toBase58());
+      console.log("treasuryMint", treasuryAddresses.treasuryMint.toBase58());
+      console.log(
+        "treasuryTokens",
+        treasuryAddresses.playerRewardDest.toBase58()
+      );
+      console.log("treasury", treasuryAddresses.treasury.toBase58());
+      console.log("tokenProgram", tokenProgram.toBase58());
+      console.log("systemProgram", systemProgram.toBase58());
+      console.log("rent", rent.toBase58());
       console.log("args", JSON.stringify(args));
       let tx = await program.idlePlants.rpc.beginGrowing({
         accounts: args,

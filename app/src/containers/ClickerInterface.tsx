@@ -29,7 +29,8 @@ export const ClickerInterface: FC<Props> = (props) => {
       if (!data) {
         throw new Error("Unable to gather metadata");
       }
-
+      console.log("treasury", addresses.treasury.toBase58());
+      console.log("treasuryMint", addresses.treasuryMint.toBase58());
       await program.idling.rpc.doClick({
         accounts: {
           owner: publicKey,
