@@ -189,11 +189,6 @@ describe("idle-plants", () => {
       [Buffer.from("plant"), testPlantMintKeypair.publicKey.toBuffer()],
       idlePlants.programId
     );
-    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    console.log("testPlant", testPlant.toBase58());
-    console.log("testPlantMint", testPlantMintKeypair.publicKey.toBase58());
-    console.log("idlePlants.programId", idlePlants.programId.toBase58());
-    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
     [playerTestPlantPlanter] = await web3.PublicKey.findProgramAddress(
       [
@@ -235,30 +230,18 @@ describe("idle-plants", () => {
   });
 
   it("begins growing the test plant", async () => {
-    const beginArgs = {
-      planter: playerTestPlantPlanter.toBase58(),
-      owner: playerWallet.publicKey,
-      plant: testPlant,
-      treasury,
-      treasuryMint: treasuryMint.publicKey,
-      treasuryTokens: playerRewardDest,
-      tokenProgram,
-      systemProgram,
-      rent,
-    };
-    console.log("planter", playerTestPlantPlanter.toBase58());
-    console.log("owner", playerWallet.publicKey.toBase58());
-    console.log("plant", testPlant.toBase58());
-    console.log("treasuryMint", treasuryMint.publicKey.toBase58());
-    console.log("treasuryTokens", playerRewardDest.toBase58());
-    console.log("treasury", treasury.toBase58());
-    console.log("tokenProgram", tokenProgram.toBase58());
-    console.log("systemProgram", systemProgram.toBase58());
-    console.log("rent", rent.toBase58());
-
-    console.log("begin growing", JSON.stringify(beginArgs));
     let tx = await idlePlants.rpc.beginGrowing({
-      accounts: beginArgs,
+      accounts: {
+        planter: playerTestPlantPlanter.toBase58(),
+        owner: playerWallet.publicKey,
+        plant: testPlant,
+        treasury,
+        treasuryMint: treasuryMint.publicKey,
+        treasuryTokens: playerRewardDest,
+        tokenProgram,
+        systemProgram,
+        rent,
+      },
       signers: [playerWallet],
     });
 

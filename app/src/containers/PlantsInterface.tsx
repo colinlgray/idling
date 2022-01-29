@@ -27,26 +27,25 @@ export const PlantsInterface: FC<Props> = (props) => {
 
   useEffect(() => {
     const fetch = async () => {
-      // if (!addresses?.plant) {
-      //   return;
-      // }
-      // const data = await connection.getAccountInfo(addresses.plant);
-      // const planterData = await connection.getAccountInfo(addresses.planter);
-      // const destData = await connection.getAccountInfo(
-      //   addresses.playerPlantRewardDest
-      // );
-      // try {
-      //   console.log("planter address:", addresses.planter.toBase58());
-      //   let planter = await program?.idlePlants.account.planter.fetch(
-      //     addresses.planter
-      //   );
-      //   console.log("planter", planter);
-      // } catch (e) {
-      //   console.error(e);
-      // }
-      // console.log("data", data);
-      // console.log("planterData", planterData);
-      // console.log("destData", destData);
+      if (!addresses?.plant) {
+        return;
+      }
+      const data = await connection.getAccountInfo(addresses.plant);
+      const planterData = await connection.getAccountInfo(addresses.planter);
+      const destData = await connection.getAccountInfo(
+        addresses.playerPlantRewardDest
+      );
+      try {
+        let planter = await program?.idlePlants.account.planter.fetch(
+          addresses.planter
+        );
+        console.log("planter", planter);
+      } catch (e) {
+        console.error(e);
+      }
+      console.log("data", data);
+      console.log("planterData", planterData);
+      console.log("destData", destData);
     };
     fetch();
   }, [addresses, program, connection]);
@@ -56,32 +55,18 @@ export const PlantsInterface: FC<Props> = (props) => {
       throw new Error("Not connected");
     }
     try {
-      const args = {
-        planter: addresses.planter,
-        owner: playerWallet.publicKey,
-        plant: addresses.plant,
-        treasury: treasuryAddresses.treasury,
-        treasuryMint: treasuryAddresses.treasuryMint,
-        treasuryTokens: treasuryAddresses.playerRewardDest,
-        tokenProgram,
-        systemProgram,
-        rent,
-      };
-      console.log("planter", addresses.planter.toBase58());
-      console.log("owner", playerWallet.publicKey.toBase58());
-      console.log("plant", addresses.plant.toBase58());
-      console.log("treasuryMint", treasuryAddresses.treasuryMint.toBase58());
-      console.log(
-        "treasuryTokens",
-        treasuryAddresses.playerRewardDest.toBase58()
-      );
-      console.log("treasury", treasuryAddresses.treasury.toBase58());
-      console.log("tokenProgram", tokenProgram.toBase58());
-      console.log("systemProgram", systemProgram.toBase58());
-      console.log("rent", rent.toBase58());
-      console.log("args", JSON.stringify(args));
       let tx = await program.idlePlants.rpc.beginGrowing({
-        accounts: args,
+        accounts: {
+          planter: addresses.planter,
+          owner: playerWallet.publicKey,
+          plant: addresses.plant,
+          treasury: treasuryAddresses.treasury,
+          treasuryMint: treasuryAddresses.treasuryMint,
+          treasuryTokens: treasuryAddresses.playerRewardDest,
+          tokenProgram,
+          systemProgram,
+          rent,
+        },
       });
       console.log("done!", tx);
       notify("success", "SUCCESS!");

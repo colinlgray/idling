@@ -25,22 +25,11 @@ export function usePlantAddresses() {
   useEffect(() => {
     const fetchAddresses = async () => {
       if (!wallet || !program?.idlePlants) return;
-      const otherId = new web3.PublicKey(
-        "4H8FuFgabDNba1S8KPLjcni2zBGV2GK8DeffDwtU535f"
-      );
+
       const [plant, plantBump] = await web3.PublicKey.findProgramAddress(
         [Buffer.from("plant"), plantMintPubKey.toBuffer()],
         program.idlePlants.programId
       );
-
-      console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-      console.log("testPlant", plant.toBase58());
-      console.log("testPlantMint", plantMintPubKey.toBase58());
-      console.log(
-        "idlePlants.programId",
-        program.idlePlants.programId.toBase58()
-      );
-      console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
       const [playerPlantPlanter] = await web3.PublicKey.findProgramAddress(
         [Buffer.from("planter"), plant.toBuffer(), wallet.publicKey.toBuffer()],
