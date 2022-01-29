@@ -10,6 +10,7 @@ solana config set -u localhost
 
 # 4.
 solana airdrop 10 $(solana-keygen pubkey ./testkey.json)
+solana airdrop 10 F68XiJ6FFq4FvJJvpSn8BHDxTdh4PhQrbcJPo68mJnrt
 
 # 5.
 solana program deploy ./target/deploy/idling.so --program-id ./idling-keypair.json

@@ -24,33 +24,16 @@ export const PlantsInterface: FC<Props> = (props) => {
   const { connection } = useConnection();
   const notify = useNotify();
   const playerWallet = useAnchorWallet();
-  const [hasBegunGrowing, setBegunGrowing] = useState<undefined | boolean>(
-    undefined
-  );
+  const [planterData, setPlanterData] =
+    useState<web3.AccountInfo<Buffer> | null>(null);
 
   useEffect(() => {
     const fetch = async () => {
       if (!addresses?.plant) {
         return;
       }
-      const data = await connection.getAccountInfo(addresses.plant);
       const planterData = await connection.getAccountInfo(addresses.planter);
-
-      try {
-        let planter = await program?.idlePlants.account.planter.fetch(
-          addresses.planter
-        );
-        console.log("planter", planter);
-      } catch (e) {
-        console.log("Has not begun growing yet");
-        setBegunGrowing(false);
-        // console.error(e);
-      }
-      if (planterData) {
-        console.log("has begun growing");
-        setBegunGrowing(true);
-      }
-      console.log("data", data);
+      setPlanterData(planterData);
       console.log("planterData", planterData);
     };
     fetch();
@@ -75,7 +58,8 @@ export const PlantsInterface: FC<Props> = (props) => {
         },
       });
       console.log("done!", tx);
-      setBegunGrowing(true);
+      const planterData = await connection.getAccountInfo(addresses.planter);
+      setPlanterData(planterData);
       notify("success", "SUCCESS!");
     } catch (e) {
       console.error(e);
@@ -98,12 +82,12 @@ export const PlantsInterface: FC<Props> = (props) => {
     // });
   };
 
-  const showBeginButton = !hasBegunGrowing;
+  const showBeginButton = planterData === null;
   const showWaterButton = !showBeginButton;
 
-  if (hasBegunGrowing === undefined) {
-    return <div className="flex justify-center">loading</div>;
-  }
+  // if (planterData === null) {
+  //   return <div className="flex justify-center">loading</div>;
+  // }
 
   return (
     <div className="flex justify-center">
