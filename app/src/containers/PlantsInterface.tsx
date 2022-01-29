@@ -5,7 +5,7 @@ import {
   useNotify,
 } from "../hooks";
 import { useConnection, useAnchorWallet } from "@solana/wallet-adapter-react";
-import { useEffect, FC } from "react";
+import { useEffect, useState, FC } from "react";
 import * as splToken from "@solana/spl-token";
 import { web3 } from "@project-serum/anchor";
 
@@ -24,6 +24,9 @@ export const PlantsInterface: FC<Props> = (props) => {
   const { connection } = useConnection();
   const notify = useNotify();
   const playerWallet = useAnchorWallet();
+  const [hasBegunGrowing, setBegunGrowing] = useState<undefined | boolean>(
+    undefined
+  );
 
   useEffect(() => {
     const fetch = async () => {
@@ -32,20 +35,23 @@ export const PlantsInterface: FC<Props> = (props) => {
       }
       const data = await connection.getAccountInfo(addresses.plant);
       const planterData = await connection.getAccountInfo(addresses.planter);
-      const destData = await connection.getAccountInfo(
-        addresses.playerPlantRewardDest
-      );
+
       try {
         let planter = await program?.idlePlants.account.planter.fetch(
           addresses.planter
         );
         console.log("planter", planter);
       } catch (e) {
-        console.error(e);
+        console.log("Has not begun growing yet");
+        setBegunGrowing(false);
+        // console.error(e);
+      }
+      if (planterData) {
+        console.log("has begun growing");
+        setBegunGrowing(true);
       }
       console.log("data", data);
       console.log("planterData", planterData);
-      console.log("destData", destData);
     };
     fetch();
   }, [addresses, program, connection]);
@@ -69,6 +75,7 @@ export const PlantsInterface: FC<Props> = (props) => {
         },
       });
       console.log("done!", tx);
+      setBegunGrowing(true);
       notify("success", "SUCCESS!");
     } catch (e) {
       console.error(e);
@@ -91,8 +98,12 @@ export const PlantsInterface: FC<Props> = (props) => {
     // });
   };
 
-  const showBeginButton = true;
+  const showBeginButton = !hasBegunGrowing;
   const showWaterButton = !showBeginButton;
+
+  if (hasBegunGrowing === undefined) {
+    return <div className="flex justify-center">loading</div>;
+  }
 
   return (
     <div className="flex justify-center">
