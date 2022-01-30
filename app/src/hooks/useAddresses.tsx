@@ -15,7 +15,7 @@ interface AccountData {
   mintAuthorityBump: number;
 }
 
-interface Addresses {
+export interface Addresses {
   treasury: PublicKey;
   treasuryMintAuthority: PublicKey;
   playerRewardDest: PublicKey;

@@ -30,7 +30,11 @@ export function Router() {
             />
           </div>
           <div className="border-2 rounded p-12 mx-24 my-6">
-            <PlantsInterface />
+            <PlantsInterface
+              onClick={() => {
+                setCount(count + 1);
+              }}
+            />
           </div>
         </>
       )}

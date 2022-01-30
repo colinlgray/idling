@@ -9,7 +9,7 @@ const plantMintPubKey = new web3.PublicKey(
   "5g9NUc3A8qmez2QS7CNUSbPw7dcKM3zzj1Ld8cX2K1NQ"
 );
 
-interface Addresses {
+export interface PlantAddresses {
   plantMint: PublicKey;
   plant: PublicKey;
   planter: PublicKey;
@@ -20,7 +20,7 @@ interface Addresses {
 export function usePlantAddresses() {
   const wallet = useAnchorWallet();
   const program = useProgram();
-  const [addresses, setAddresses] = useState<Addresses | null>(null);
+  const [addresses, setAddresses] = useState<PlantAddresses | null>(null);
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -49,7 +49,7 @@ export function usePlantAddresses() {
         plant,
         plantBump,
         planter: playerPlantPlanter,
-        playerPlantRewardDest: playerPlantRewardDest,
+        playerPlantRewardDest,
       });
     };
 
