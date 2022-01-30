@@ -31,5 +31,5 @@ export const PointsDisplay: FC<Props> = (props) => {
     requestPoints();
   }, [connection, props.count, addresses]);
 
-  return <div className="flex justify-end">Water: {currentTokens}</div>;
+  return <div className="flex justify-end">Tokens: {currentTokens}</div>;
 };

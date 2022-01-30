@@ -8,6 +8,7 @@ import { useConnection, useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState, FC } from "react";
 import * as splToken from "@solana/spl-token";
 import { web3 } from "@project-serum/anchor";
+import { PublicKey } from "@solana/web3.js";
 
 const systemProgram = web3.SystemProgram.programId;
 const tokenProgram = splToken.TOKEN_PROGRAM_ID;
@@ -27,6 +28,8 @@ export const PlantsInterface: FC<Props> = (props) => {
   const [planterData, setPlanterData] =
     useState<web3.AccountInfo<Buffer> | null>(null);
 
+  const planter = useState();
+
   useEffect(() => {
     const fetch = async () => {
       if (!addresses?.plant) {
@@ -34,10 +37,28 @@ export const PlantsInterface: FC<Props> = (props) => {
       }
       const planterData = await connection.getAccountInfo(addresses.planter);
       setPlanterData(planterData);
-      console.log("planterData", planterData);
     };
     fetch();
   }, [addresses, program, connection]);
+
+  useEffect(() => {
+    const getData = async () => {
+      if (addresses && program) {
+        try {
+          const parsed = await program.idlePlants.account.planter.fetchNullable(
+            addresses.planter
+          );
+          if (parsed) {
+            console.log("timesWatered", parsed.timesWatered);
+          }
+        } catch (error) {
+          console.error("error", error);
+        }
+      }
+    };
+
+    getData();
+  }, [planterData, program]);
 
   const handleBeginGrowing = async () => {
     if (!program || !addresses || !playerWallet || !treasuryAddresses) {
@@ -72,22 +93,29 @@ export const PlantsInterface: FC<Props> = (props) => {
 
   const handleWatering = async () => {
     console.log("click water");
-    // let tx = await idlePlants.rpc.waterPlanter({
-    //   accounts: {
-    //     planter: playerTestPlantPlanter,
-    //     plant: testPlant,
-    //     owner: playerWallet.publicKey,
-    //   },
-    //   signers: [playerWallet],
-    // });
+    if (!program || !addresses || !playerWallet || !treasuryAddresses) {
+      throw new Error("Not connected");
+    }
+    try {
+      await program.idlePlants.rpc.waterPlanter({
+        accounts: {
+          planter: addresses.planter,
+          plant: addresses.plant,
+          owner: playerWallet.publicKey,
+        },
+      });
+      notify("success", "Plant has been watered");
+    } catch (e) {
+      console.error(e);
+      const errAsAny = e as any;
+      if (errAsAny?.message) {
+        notify("error", errAsAny.message);
+      }
+    }
   };
 
   const showBeginButton = planterData === null;
   const showWaterButton = !showBeginButton;
-
-  // if (planterData === null) {
-  //   return <div className="flex justify-center">loading</div>;
-  // }
 
   return (
     <div className="flex justify-center">

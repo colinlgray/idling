@@ -67,7 +67,7 @@ export const ClickerInterface: FC<Props> = (props) => {
             }
           }}
         >
-          Get water
+          Get tokens
         </button>
       </div>
     </div>
