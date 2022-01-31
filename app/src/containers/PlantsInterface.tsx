@@ -184,7 +184,13 @@ export const PlantsInterface: FC<Props> = (props) => {
   return (
     <div>
       <div className="flex justify-center">
-        Times Watered: {planterData?.timesWatered}
+        {showBeginButton && <img src="/assets/plant_pot.jpg" />}
+        {planterData?.timesWatered === 0 && (
+          <img src="/assets/plant_pot_growth_1.jpg" />
+        )}
+        {planterData?.timesWatered === 1 && (
+          <img src="/assets/plant_pot_growth_2.jpg" />
+        )}
       </div>
       <div className="flex justify-center">
         {showBeginButton && (
