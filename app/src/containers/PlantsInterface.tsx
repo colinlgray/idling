@@ -60,7 +60,6 @@ export const PlantsInterface: FC<Props> = (props) => {
         setPlanterData(null);
       }
       if (parsedPlant?.data) {
-        console.log("plant", parsedPlant);
         setPlantData(parsedPlant.data as Plant);
       }
     } catch (error) {
