@@ -2,9 +2,10 @@ import { AppProps } from "next/app";
 import Head from "next/head";
 import { FC } from "react";
 import { ContextProvider } from "../contexts/ContextProvider";
-import { AppBar } from "../components/AppBar";
 import { ContentContainer } from "../components/ContentContainer";
+import { AppBar } from "../components/AppBar";
 import { Footer } from "../components/Footer";
+import { Sidebar } from "../components/Sidebar";
 import Notifications from "../components/Notification";
 
 require("@solana/wallet-adapter-react-ui/styles.css");
@@ -18,13 +19,18 @@ const App: FC<AppProps> = ({ Component, pageProps }) => {
       </Head>
 
       <ContextProvider>
-        <div className="flex flex-col h-screen">
-          <Notifications />
-          <AppBar />
-          <ContentContainer>
-            <Component {...pageProps} />
-          </ContentContainer>
-          <Footer />
+        <Notifications />
+        <div className="flex flex-row min-h-screen bg-gray-100 text-gray-800">
+          <Sidebar />
+          <main className="main flex flex-col flex-grow -ml-64 md:ml-0 transition-all duration-150 ease-in">
+            <AppBar />
+            <div className="main-content flex flex-col flex-grow p-4">
+              <ContentContainer>
+                <Component {...pageProps} />
+              </ContentContainer>
+            </div>
+            <Footer />
+          </main>
         </div>
       </ContextProvider>
     </>

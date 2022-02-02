@@ -8,8 +8,13 @@ export const AppBar: FC = (props) => {
   const { autoConnect, setAutoConnect } = useAutoConnect();
 
   return (
-    <div className="flex justify-end p-2">
-      <WalletMultiButton className="btn btn-ghost mr-2" />
-    </div>
+    <header className="header bg-white shadow py-4 px-4">
+      <div className="header-content flex items-center flex-row">
+        <div className="flex md:hidden"></div>
+        <div className="flex ml-auto">
+          <WalletMultiButton className="btn btn-ghost mr-2" />
+        </div>
+      </div>
+    </header>
   );
 };
