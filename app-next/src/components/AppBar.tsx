@@ -8,7 +8,7 @@ export const AppBar: FC = (props) => {
   const { autoConnect, setAutoConnect } = useAutoConnect();
 
   return (
-    <header className="header bg-white shadow py-4 px-4">
+    <header className="header bg-gray-700 shadow py-4 px-4">
       <div className="header-content flex items-center flex-row">
         <div className="flex md:hidden"></div>
         <div className="flex ml-auto">

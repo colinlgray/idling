@@ -12,9 +12,7 @@ export const HomeView: FC = ({}) => {
   return (
     <div className="hero mx-auto p-4 min-h-16 py-4">
       <div className="hero-content flex flex-col max-w-lg">
-        <h1 className="text-5xl pb-2 font-bold text-transparent bg-clip-text bg-gradient-to-tr from-[#9945FF] to-[#14F195]">
-          Idling
-        </h1>
+        main content goes here
       </div>
     </div>
   );
