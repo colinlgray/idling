@@ -19,15 +19,7 @@ export const Sidebar: FC = () => {
               <span className="flex items-center justify-center text-lg text-gray-400">
                 💐
               </span>
-              <span className="ml-3">Available Plants</span>
-            </div>
-          </div>
-          <div className="my-px">
-            <div className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-100 bg-gray-700">
-              <span className="flex items-center justify-center text-lg text-gray-400">
-                💰
-              </span>
-              <span className="ml-3">Buff Shop</span>
+              <span className="ml-3">Your Garden</span>
             </div>
           </div>
           <div className="my-px">
@@ -35,7 +27,15 @@ export const Sidebar: FC = () => {
               <span className="flex items-center justify-center text-lg text-gray-400">
                 👨‍🌾
               </span>
-              <span className="ml-3">Profile</span>
+              <span className="ml-3">Your Farmer</span>
+            </div>
+          </div>
+          <div className="my-px">
+            <div className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-100 bg-gray-700">
+              <span className="flex items-center justify-center text-lg text-gray-400">
+                💰
+              </span>
+              <span className="ml-3">Item Shop</span>
             </div>
           </div>
         </div>
