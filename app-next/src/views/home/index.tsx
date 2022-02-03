@@ -12,7 +12,7 @@ export const HomeView: FC = ({}) => {
   return (
     <div className="hero mx-auto p-4 min-h-16 py-4">
       <div className="hero-content flex flex-col max-w-lg">
-        main content goes here
+        Your garden goes here
       </div>
     </div>
   );

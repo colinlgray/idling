@@ -1,4 +1,5 @@
 import { FC } from "react";
+import Link from "next/link";
 
 export const Sidebar: FC = () => {
   return (
@@ -15,28 +16,34 @@ export const Sidebar: FC = () => {
       <div className="sidebar-content px-4 py-6">
         <div className="flex flex-col w-full">
           <div className="my-px">
-            <div className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-100 bg-gray-700">
-              <span className="flex items-center justify-center text-lg text-gray-400">
-                💐
-              </span>
-              <span className="ml-3">Your Garden</span>
-            </div>
+            <Link href="/">
+              <a className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-100 bg-gray-700">
+                <span className="flex items-center justify-center text-lg text-gray-400">
+                  💐
+                </span>
+                <span className="ml-3">Your Garden</span>
+              </a>
+            </Link>
           </div>
           <div className="my-px">
-            <div className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-100 bg-gray-700">
-              <span className="flex items-center justify-center text-lg text-gray-400">
-                👨‍🌾
-              </span>
-              <span className="ml-3">Your Farmer</span>
-            </div>
+            <Link href="/profile">
+              <a className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-100 bg-gray-700">
+                <span className="flex items-center justify-center text-lg text-gray-400">
+                  👨‍🌾
+                </span>
+                <span className="ml-3">Your Farmer</span>
+              </a>
+            </Link>
           </div>
           <div className="my-px">
-            <div className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-100 bg-gray-700">
-              <span className="flex items-center justify-center text-lg text-gray-400">
-                💰
-              </span>
-              <span className="ml-3">Item Shop</span>
-            </div>
+            <Link href="/shop">
+              <a className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-100 bg-gray-700">
+                <span className="flex items-center justify-center text-lg text-gray-400">
+                  💰
+                </span>
+                <span className="ml-3">Item Shop</span>
+              </a>
+            </Link>
           </div>
         </div>
       </div>
