@@ -56,7 +56,6 @@ export function useAddresses() {
             treasury
           )) as AccountData;
         }
-        console.log("data", data);
         if (!data) {
           throw new Error("Unable to gather metadata");
         }
