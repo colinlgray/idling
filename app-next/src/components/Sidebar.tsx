@@ -46,10 +46,17 @@ export const Sidebar: FC = () => {
       </div>
       <div className="sidebar-content px-4 py-6">
         <div className="flex flex-col w-full">
+          <ListElement label="Home" emoji="🏠" path="/" router={router} />
+          <ListElement
+            label="Faucet"
+            emoji="🚰"
+            path="/faucet"
+            router={router}
+          />
           <ListElement
             label="Your Garden"
             emoji="💐"
-            path="/"
+            path="/garden"
             router={router}
           />
           <ListElement

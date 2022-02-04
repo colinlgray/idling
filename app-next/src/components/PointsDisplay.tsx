@@ -28,16 +28,16 @@ export const PointsDisplay: FC<Props> = (props) => {
         setCurrentTokens(-1);
       }
 
-      const playerRewardDestData = await connection.getAccountInfo(
-        addresses.playerPlantRewardDest
-      );
-      if (playerRewardDestData?.data) {
-        setCurrentRewardTokens(
-          deserializeAccount(playerRewardDestData.data).amount.toNumber()
-        );
-      } else {
-        setCurrentTokens(-1);
-      }
+      // const playerRewardDestData = await connection.getAccountInfo(
+      //   addresses.playerPlantRewardDest
+      // );
+      // if (playerRewardDestData?.data) {
+      //   setCurrentRewardTokens(
+      //     deserializeAccount(playerRewardDestData.data).amount.toNumber()
+      //   );
+      // } else {
+      //   setCurrentRewardTokens(-1);
+      // }
     };
 
     requestPoints();
@@ -46,7 +46,7 @@ export const PointsDisplay: FC<Props> = (props) => {
   return (
     <div>
       <div className="">Tokens: {currentTokens}</div>
-      <div className="">Reward Tokens: {currentRewardTokens}</div>
+      <div className="">Your rank: 133545</div>
     </div>
   );
 };
