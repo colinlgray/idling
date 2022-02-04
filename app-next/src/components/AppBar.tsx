@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { PointsDisplay } from "./PointsDisplay";
 import Link from "next/link";
 
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
@@ -11,7 +12,8 @@ export const AppBar: FC = (props) => {
     <header className="header bg-gray-700 shadow py-4 px-4">
       <div className="header-content flex items-center flex-row">
         <div className="flex md:hidden"></div>
-        <div className="flex ml-auto">
+        <div className="flex justify-between w-full">
+          <PointsDisplay />
           <WalletMultiButton className="btn btn-ghost mr-2" />
         </div>
       </div>
