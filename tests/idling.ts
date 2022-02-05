@@ -35,6 +35,7 @@ let playerTestPlantRewardDest: web3.PublicKey;
 
 const testPlantMintKeypair = plantMintKeypair;
 let testPlantMint: splToken.Token;
+let testPlants: { plant: web3.PublicKey; bump: number }[];
 let testPlant: web3.PublicKey;
 let testPlantBump: number;
 
@@ -177,18 +178,47 @@ describe("idling", () => {
 });
 
 describe("idle-plants", () => {
-  const plantData = {
-    maxGrowth: new anchor.BN(20),
-    requiredWaterings: 1,
-    timeTillThirsty: new anchor.BN(2),
-    cost: new anchor.BN(50),
-  };
+  const plantData = [
+    {
+      maxGrowth: new anchor.BN(20),
+      requiredWaterings: 1,
+      timeTillThirsty: new anchor.BN(2),
+      cost: new anchor.BN(50),
+    },
+    {
+      maxGrowth: new anchor.BN(60),
+      requiredWaterings: 3,
+      timeTillThirsty: new anchor.BN(6),
+      cost: new anchor.BN(100),
+    },
+    {
+      maxGrowth: new anchor.BN(300),
+      requiredWaterings: 5,
+      timeTillThirsty: new anchor.BN(10),
+      cost: new anchor.BN(500),
+    },
+    {
+      maxGrowth: new anchor.BN(2000),
+      requiredWaterings: 10,
+      timeTillThirsty: new anchor.BN(20),
+      cost: new anchor.BN(5000),
+    },
+  ];
 
   before(async () => {
-    [testPlant, testPlantBump] = await web3.PublicKey.findProgramAddress(
-      [Buffer.from("plant"), testPlantMintKeypair.publicKey.toBuffer()],
-      idlePlants.programId
+    testPlants = await Promise.all(
+      plantData.map(async () => {
+        const [testPlant, testPlantBump] =
+          await web3.PublicKey.findProgramAddress(
+            [Buffer.from("plant"), testPlantMintKeypair.publicKey.toBuffer()],
+            idlePlants.programId
+          );
+        return { plant: testPlant, bump: testPlantBump };
+      })
     );
+
+    testPlant = testPlants[0].plant;
+    testPlantBump = testPlants[0].bump;
 
     [playerTestPlantPlanter] = await web3.PublicKey.findProgramAddress(
       [
@@ -215,7 +245,7 @@ describe("idle-plants", () => {
   });
 
   it("creates a plant", async () => {
-    await idlePlants.rpc.initPlant(testPlantBump, plantData, {
+    await idlePlants.rpc.initPlant(testPlantBump, plantData[0], {
       accounts: {
         plant: testPlant,
         plantMint: testPlantMintKeypair.publicKey,
@@ -354,7 +384,7 @@ describe("idle-plants", () => {
     );
     console.log("balance after harvest", playerPlantAcct.amount.toString());
     expect(
-      playerPlantAcct.amount.lte(plantData.maxGrowth),
+      playerPlantAcct.amount.lte(plantData[0].maxGrowth),
       "harvest to be <= maxGrowth"
     ).to.be.true;
   });

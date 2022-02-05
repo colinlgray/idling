@@ -10,7 +10,10 @@ solana config set -u localhost
 
 # 4.
 solana airdrop 10 $(solana-keygen pubkey ./testkey.json)
-solana airdrop 10 F68XiJ6FFq4FvJJvpSn8BHDxTdh4PhQrbcJPo68mJnrt
+
+if [[ $PERSONAL_PUBLIC_KEY == "x" ]]; then solana airdrop 10 $PERSONAL_PUBLIC_KEY; else echo "No personal key"; fi
+
+
 
 # 5.
 solana program deploy ./target/deploy/idling.so --program-id ./idling-keypair.json
