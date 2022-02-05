@@ -1,14 +1,11 @@
 import type { NextPage } from "next";
-import Head from "next/head";
 import { ShopView } from "../views";
+import { AppTitle } from "../components/AppTitle";
 
 const Shop: NextPage = (props) => {
   return (
     <div>
-      <Head>
-        <title>Idling</title>
-        <meta name="description" content="Idling shop" />
-      </Head>
+      <AppTitle />
       <ShopView />
     </div>
   );
