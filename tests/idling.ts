@@ -5,7 +5,7 @@ import * as splToken from "@solana/spl-token";
 import { expect } from "chai";
 import {
   treasuryKeypair,
-  plantMintKeypair,
+  plantMintKeypairs,
   airdrop,
   sleep,
   playerKeypair,
@@ -33,7 +33,7 @@ let playerRewardDest: web3.PublicKey;
 let playerTestPlantPlanter: web3.PublicKey;
 let playerTestPlantRewardDest: web3.PublicKey;
 
-const testPlantMintKeypair = plantMintKeypair;
+const testPlantMintKeypair = plantMintKeypairs[0];
 let testPlantMint: splToken.Token;
 let testPlants: { plant: web3.PublicKey; bump: number }[];
 let testPlant: web3.PublicKey;
@@ -207,13 +207,16 @@ describe("idle-plants", () => {
 
   before(async () => {
     testPlants = await Promise.all(
-      plantData.map(async () => {
+      plantData.map(async (_, idx) => {
         const [testPlant, testPlantBump] =
           await web3.PublicKey.findProgramAddress(
-            [Buffer.from("plant"), testPlantMintKeypair.publicKey.toBuffer()],
+            [Buffer.from("plant"), plantMintKeypairs[idx].publicKey.toBuffer()],
             idlePlants.programId
           );
-        return { plant: testPlant, bump: testPlantBump };
+        return {
+          plant: testPlant,
+          bump: testPlantBump,
+        };
       })
     );
 
@@ -245,18 +248,24 @@ describe("idle-plants", () => {
   });
 
   it("creates a plant", async () => {
-    await idlePlants.rpc.initPlant(testPlantBump, plantData[0], {
-      accounts: {
-        plant: testPlant,
-        plantMint: testPlantMintKeypair.publicKey,
-        treasury: treasury,
-        authority: treasuryAuthority.publicKey,
-        systemProgram,
-        tokenProgram,
-        rent,
-      },
-      signers: [testPlantMintKeypair, treasuryAuthority],
-    });
+    await Promise.all(
+      plantData.map(async (pData, idx) => {
+        const thisPlant = testPlants[idx];
+        const thisKeypair = plantMintKeypairs[idx];
+        return await idlePlants.rpc.initPlant(thisPlant.bump, pData, {
+          accounts: {
+            plant: thisPlant.plant,
+            plantMint: thisKeypair.publicKey,
+            treasury: treasury,
+            authority: treasuryAuthority.publicKey,
+            systemProgram,
+            tokenProgram,
+            rent,
+          },
+          signers: [thisKeypair, treasuryAuthority],
+        });
+      })
+    );
   });
 
   it("begins growing the test plant", async () => {

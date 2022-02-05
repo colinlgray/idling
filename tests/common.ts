@@ -8,7 +8,12 @@ export function loadKeypair(path: string): web3.Keypair {
   );
 }
 
-export const plantMintKeypair = loadKeypair("./plant-mint-keypair.json");
+export const plantMintKeypairs = [
+  loadKeypair("./plant-mint-keypair-1.json"),
+  loadKeypair("./plant-mint-keypair-2.json"),
+  loadKeypair("./plant-mint-keypair-3.json"),
+  loadKeypair("./plant-mint-keypair-4.json"),
+];
 export const treasuryKeypair = loadKeypair("./testkey.json");
 export const playerKeypair = loadKeypair("./player-keypair.json");
 
