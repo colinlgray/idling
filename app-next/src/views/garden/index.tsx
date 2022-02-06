@@ -1,18 +1,7 @@
 // Next, React
 import { FC } from "react";
-import { TokenFaucet } from "../components/TokenFaucet";
-
-interface ElementProps {
-  label: string;
-}
-
-const GardenElement: FC<ElementProps> = (props) => {
-  return (
-    <div className="flex justify-center text-6xl border-2 border-gray-300 rounded-xl p-6 ">
-      {props.label}
-    </div>
-  );
-};
+import { TokenFaucet } from "../../components/TokenFaucet";
+import { PlanterInterface } from "./planter";
 
 export const GardenView: FC = ({}) => {
   return (
@@ -21,10 +10,10 @@ export const GardenView: FC = ({}) => {
         <h2 className="text-xl">Your Garden:</h2>
         <div className="container mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <GardenElement label={"🌾"} />
-            <GardenElement label={"🌿"} />
-            <GardenElement label={"🌱"} />
-            <GardenElement label={"🌳"} />
+            <PlanterInterface label={"🌾"} />
+            <PlanterInterface label={"🌿"} />
+            <PlanterInterface label={"🌱"} />
+            <PlanterInterface label={"🌳"} />
           </div>
         </div>
         <div className="py-4">
