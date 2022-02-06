@@ -3,6 +3,8 @@ import { useProgram, useAddresses } from "../hooks";
 import { web3 } from "@project-serum/anchor";
 import * as splToken from "@solana/spl-token";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { notify } from "../utils/notifications";
+import useUserTokenBalanceStore from "../stores/useUserTokenBalanceStore";
 
 const associatedTokenProgram = splToken.ASSOCIATED_TOKEN_PROGRAM_ID;
 const tokenProgram = splToken.TOKEN_PROGRAM_ID;
@@ -16,6 +18,10 @@ export const TokenFaucet: FC<Props> = (props) => {
   const addresses = useAddresses();
   const program = useProgram();
   const { publicKey } = useWallet();
+  const balance = useUserTokenBalanceStore((s) => s.balance);
+  const { update } = useUserTokenBalanceStore();
+
+  let txId: string;
   const handleClick = async () => {
     try {
       if (!program || !publicKey || !addresses) {
@@ -29,7 +35,7 @@ export const TokenFaucet: FC<Props> = (props) => {
         throw new Error("Unable to gather metadata");
       }
 
-      await program.idling.rpc.doClick({
+      txId = await program.idling.rpc.doClick({
         accounts: {
           owner: publicKey,
           clicker: addresses.playerClicker,
@@ -43,15 +49,18 @@ export const TokenFaucet: FC<Props> = (props) => {
           rent,
         },
       });
-
-      //   notify("success", "SUCCESS!");
-    } catch (e) {
-      if ((e as any).message) {
-        console.error(e);
-        // notify("error", `${(e as any).message}`);
-      } else {
-        // notify("error", "something went wrong");
-      }
+      notify({
+        type: "success",
+        message: "You received some tokens!",
+        txid: txId,
+      });
+    } catch (e: any) {
+      notify({
+        type: "error",
+        message: `Transaction failed!`,
+        description: e?.message,
+        txid: txId,
+      });
     }
   };
   return (
@@ -64,6 +73,7 @@ export const TokenFaucet: FC<Props> = (props) => {
             if (props.onClick) {
               props.onClick();
             }
+            update({ balance: balance + 50 });
           }}
         >
           Get tokens
