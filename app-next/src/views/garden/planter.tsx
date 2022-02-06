@@ -1,10 +1,13 @@
-import { useAddresses, useProgram } from "../../hooks";
-import { Addresses } from "../../hooks/useAddresses";
+import { useAddresses, useProgram, usePlanterAddresses } from "../../hooks";
+import { PlanterAddresses } from "../../hooks/usePlanterAddresses";
 import { useConnection, useAnchorWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState, FC } from "react";
 import * as splToken from "@solana/spl-token";
 import { web3, BN, AccountClient } from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
+import { Plant, Planter } from "../../models/types";
+
+import { notify } from "../../utils/notifications";
 
 const associatedTokenProgram = splToken.ASSOCIATED_TOKEN_PROGRAM_ID;
 const systemProgram = web3.SystemProgram.programId;
@@ -14,25 +17,12 @@ const rent = web3.SYSVAR_RENT_PUBKEY;
 interface Props {
   onClick?: () => void;
   label: string;
-}
-
-export interface Planter {
-  timesWatered: number;
-  lastWatered: BN;
-  owner: PublicKey;
-  plant: PublicKey;
-  createdAt: BN;
-}
-
-export interface Plant {
-  cost: BN;
-  maxGrowth: BN;
-  requiredWaterings: number;
-  timeTillThirsty: BN;
+  plantMint: PublicKey;
 }
 
 export const PlanterInterface: FC<Props> = (props) => {
   const addresses = useAddresses();
+  const planterAddresses = usePlanterAddresses(props.plantMint);
   const program = useProgram();
   const { connection } = useConnection();
   const playerWallet = useAnchorWallet();
@@ -42,7 +32,7 @@ export const PlanterInterface: FC<Props> = (props) => {
   const refreshPlanter = async (
     planter: AccountClient,
     plant: AccountClient,
-    addresses: Addresses
+    addresses: PlanterAddresses
   ) => {
     try {
       const parsed = await planter.fetchNullable(addresses.planter);
@@ -61,18 +51,18 @@ export const PlanterInterface: FC<Props> = (props) => {
     }
   };
 
-  const handleError = (e: unknown) => {
-    console.error(e);
-    const errAsAny = e as any;
-    if (errAsAny?.message) {
-      //   notify("error", errAsAny.message);
-    }
+  const handleError = (e: any) => {
+    notify({
+      type: "error",
+      message: `Transaction failed!`,
+      description: e?.message,
+    });
   };
 
   useEffect(() => {
     const fetch = async () => {
       if (
-        !addresses?.plant ||
+        !planterAddresses?.plant ||
         !program ||
         !program.idlePlants.account.planter
       ) {
@@ -81,11 +71,11 @@ export const PlanterInterface: FC<Props> = (props) => {
       refreshPlanter(
         program.idlePlants.account.planter,
         program.idlePlants.account.plant,
-        addresses
+        planterAddresses
       );
     };
     fetch();
-  }, [addresses, program, connection]);
+  }, [planterAddresses, program, connection]);
 
   const handleBeginGrowing = async () => {
     try {
@@ -94,9 +84,9 @@ export const PlanterInterface: FC<Props> = (props) => {
       }
       let tx = await program.idlePlants.rpc.beginGrowing({
         accounts: {
-          planter: addresses.planter,
+          planter: planterAddresses.planter,
           owner: playerWallet.publicKey,
-          plant: addresses.plant,
+          plant: planterAddresses.plant,
           treasury: addresses.treasury,
           treasuryMint: addresses.treasuryMint,
           treasuryTokens: addresses.playerRewardDest,
@@ -108,10 +98,13 @@ export const PlanterInterface: FC<Props> = (props) => {
       refreshPlanter(
         program.idlePlants.account.planter,
         program.idlePlants.account.plant,
-        addresses
+        planterAddresses
       );
-      console.log("done!", tx);
-      //   notify("success", "SUCCESS!");
+      // TODO: subtract cost from current funds
+      notify({
+        type: "success",
+        message: "You have a new plant!",
+      });
     } catch (e) {
       handleError(e);
     }
@@ -124,17 +117,20 @@ export const PlanterInterface: FC<Props> = (props) => {
       }
       await program.idlePlants.rpc.waterPlanter({
         accounts: {
-          planter: addresses.planter,
-          plant: addresses.plant,
+          planter: planterAddresses.planter,
+          plant: planterAddresses.plant,
           owner: playerWallet.publicKey,
         },
       });
       refreshPlanter(
         program.idlePlants.account.planter,
         program.idlePlants.account.plant,
-        addresses
+        planterAddresses
       );
-      //   notify("success", "Plant has been watered");
+      notify({
+        type: "success",
+        message: "Plant has been watered!",
+      });
     } catch (e) {
       handleError(e);
     }
@@ -147,80 +143,85 @@ export const PlanterInterface: FC<Props> = (props) => {
       }
       await program.idlePlants.rpc.harvestPlanter({
         accounts: {
-          planter: addresses.planter,
+          planter: planterAddresses.planter,
           owner: playerWallet.publicKey,
-          plant: addresses.plant,
-          plantMint: addresses.plantMint,
-          harvestDest: addresses.playerPlantRewardDest,
+          plant: planterAddresses.plant,
+          plantMint: planterAddresses.plantMint,
+          harvestDest: planterAddresses.playerPlantRewardDest,
           tokenProgram,
           associatedTokenProgram,
           systemProgram,
           rent,
         },
       });
-      console.log("after harvest");
+
       refreshPlanter(
         program.idlePlants.account.planter,
         program.idlePlants.account.plant,
-        addresses
+        planterAddresses
       );
-      //   notify("success", "Plant has been harvested");
+      notify({
+        type: "success",
+        message: "Plant has been harvested!",
+      });
     } catch (e) {
       handleError(e);
     }
   };
 
-  const showBeginButton = planterData === null;
-  const showWaterButton = !showBeginButton && planterData?.timesWatered !== 1;
-  const showNext =
-    planterData && planterData?.timesWatered === plantData?.requiredWaterings;
+  let label: string;
+  let clickHandler: () => Promise<void>;
+  if (planterData === null) {
+    label = "Begin";
+    clickHandler = handleBeginGrowing;
+  } else if (
+    planterData !== null &&
+    planterData?.timesWatered !== plantData?.requiredWaterings
+  ) {
+    label = "Water Plant";
+    clickHandler = handleWatering;
+  } else if (
+    planterData &&
+    planterData?.timesWatered === plantData?.requiredWaterings
+  ) {
+    label = "Harvest Plant";
+    clickHandler = handleHarvesting;
+  }
 
   const buttonClassName =
     "bg-green-600 hover:bg-green-700 font-bold py-1 px-2 rounded";
 
+  let timesWateredLabel = "";
+  if (planterData && plantData) {
+    timesWateredLabel = `${planterData.timesWatered}/${plantData.requiredWaterings}`;
+  }
+
+  let costLabel = "";
+  if (plantData) {
+    costLabel = `\$${plantData.cost}`;
+  }
+
   return (
     <div>
-      <div className="flex justify-center text-6xl border-2 border-gray-300 rounded-xl p-6 cursor-pointer">
+      <div className="flex justify-center text-6xl border-2 border-gray-300 rounded-xl p-6 cursor-pointer relative">
+        <span className="absolute left-1 text-xs top-1">
+          {timesWateredLabel}
+        </span>
+        <span className="absolute text-xs top-1 right-1">{costLabel}</span>
         {props.label}
       </div>
       <div className="flex justify-center py-2">
-        {showBeginButton && (
+        {label && (
           <button
             className={buttonClassName}
             onClick={async () => {
-              await handleBeginGrowing();
+              await clickHandler();
               if (props.onClick) {
                 props.onClick();
               }
             }}
           >
-            Begin
-          </button>
-        )}
-        {showWaterButton && (
-          <button
-            className={buttonClassName}
-            onClick={async () => {
-              await handleWatering();
-              if (props.onClick) {
-                props.onClick();
-              }
-            }}
-          >
-            Water Plant
-          </button>
-        )}
-        {showNext && (
-          <button
-            className={buttonClassName}
-            onClick={async () => {
-              await handleHarvesting();
-              if (props.onClick) {
-                props.onClick();
-              }
-            }}
-          >
-            Harvest
+            {label}
           </button>
         )}
       </div>
