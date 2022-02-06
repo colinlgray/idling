@@ -23,7 +23,7 @@ const App: FC<AppProps> = ({ Component, pageProps }) => {
           <Sidebar />
           <main className="main flex flex-col flex-grow -ml-64 md:ml-0 transition-all duration-150 ease-in">
             <AppBar />
-            <div className="main-content flex flex-col flex-grow p-4">
+            <div className="main-content flex flex-col flex-grow">
               <ContentContainer>
                 <Component {...pageProps} />
               </ContentContainer>

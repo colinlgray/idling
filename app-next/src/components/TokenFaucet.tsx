@@ -52,7 +52,6 @@ export const TokenFaucet: FC<Props> = (props) => {
       notify({
         type: "success",
         message: "You received some tokens!",
-        txid: txId,
       });
     } catch (e: any) {
       notify({
