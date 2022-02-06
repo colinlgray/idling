@@ -54,15 +54,15 @@ export const Sidebar: FC = () => {
             router={router}
           />
           <ListElement
-            label="Your Farmer"
-            emoji="👨‍🌾"
-            path="/profile"
+            label="Your inventory"
+            emoji="💰"
+            path="/inventory"
             router={router}
           />
           <ListElement
-            label="Item Shop"
-            emoji="💰"
-            path="/shop"
+            label="Leaderboard"
+            emoji="📈"
+            path="/leaderboard"
             router={router}
           />
         </div>

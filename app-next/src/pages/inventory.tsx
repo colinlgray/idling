@@ -1,14 +1,14 @@
 import type { NextPage } from "next";
-import { ProfileView } from "../views";
+import { InventoryView } from "../views";
 
 import { AppTitle } from "../components/AppTitle";
-const Profile: NextPage = (props) => {
+const Inventory: NextPage = (props) => {
   return (
     <div>
       <AppTitle />
-      <ProfileView />
+      <InventoryView />
     </div>
   );
 };
 
-export default Profile;
+export default Inventory;

@@ -1,14 +1,14 @@
 import type { NextPage } from "next";
-import { ShopView } from "../views";
+import { LeaderboardView } from "../views";
 import { AppTitle } from "../components/AppTitle";
 
-const Shop: NextPage = (props) => {
+const Leaderboard: NextPage = (props) => {
   return (
     <div>
       <AppTitle />
-      <ShopView />
+      <LeaderboardView />
     </div>
   );
 };
 
-export default Shop;
+export default Leaderboard;
