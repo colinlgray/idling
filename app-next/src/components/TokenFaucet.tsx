@@ -23,44 +23,31 @@ export const TokenFaucet: FC<Props> = (props) => {
 
   let txId: string;
   const handleClick = async () => {
-    try {
-      if (!program || !publicKey || !addresses) {
-        throw new Error("Program does not exist");
-      }
-
-      const data = await program.idling.account.treasury.fetchNullable(
-        addresses.treasury
-      );
-      if (!data) {
-        throw new Error("Unable to gather metadata");
-      }
-
-      txId = await program.idling.rpc.doClick({
-        accounts: {
-          owner: publicKey,
-          clicker: addresses.playerClicker,
-          treasury: addresses.treasury,
-          treasuryMintAuthority: addresses.treasuryMintAuthority,
-          treasuryMint: data.mint,
-          rewardDest: addresses.playerRewardDest,
-          tokenProgram,
-          systemProgram,
-          associatedTokenProgram,
-          rent,
-        },
-      });
-      notify({
-        type: "success",
-        message: "You received some tokens!",
-      });
-    } catch (e: any) {
-      notify({
-        type: "error",
-        message: `Transaction failed!`,
-        description: e?.message,
-        txid: txId,
-      });
+    if (!program || !publicKey || !addresses) {
+      throw new Error("Program does not exist");
     }
+
+    const data = await program.idling.account.treasury.fetchNullable(
+      addresses.treasury
+    );
+    if (!data) {
+      throw new Error("Unable to gather metadata");
+    }
+
+    txId = await program.idling.rpc.doClick({
+      accounts: {
+        owner: publicKey,
+        clicker: addresses.playerClicker,
+        treasury: addresses.treasury,
+        treasuryMintAuthority: addresses.treasuryMintAuthority,
+        treasuryMint: data.mint,
+        rewardDest: addresses.playerRewardDest,
+        tokenProgram,
+        systemProgram,
+        associatedTokenProgram,
+        rent,
+      },
+    });
   };
   return (
     <div>
@@ -68,11 +55,25 @@ export const TokenFaucet: FC<Props> = (props) => {
         <button
           className="bg-blue-500 hover:bg-blue-700 font-bold py-1 px-2 rounded"
           onClick={async () => {
-            await handleClick();
-            if (props.onClick) {
-              props.onClick();
+            try {
+              await handleClick();
+              if (props.onClick) {
+                props.onClick();
+              }
+              // TODO: This is broken for first click
+              update({ balance: balance + 50 });
+              notify({
+                type: "success",
+                message: "You received some tokens!",
+              });
+            } catch (e: any) {
+              notify({
+                type: "error",
+                message: `Transaction failed!`,
+                description: e?.message,
+                txid: txId,
+              });
             }
-            update({ balance: balance + 50 });
           }}
         >
           Get tokens 🚰
