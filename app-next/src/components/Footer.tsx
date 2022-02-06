@@ -36,7 +36,6 @@ export const Footer: FC = () => {
     <footer className="footer px-4 py-6">
       <div className="flex md:hidden">
         <ListElement label="Home" emoji="🏠" path="/" router={router} />
-        <ListElement label="Faucet" emoji="🚰" path="/faucet" router={router} />
         <ListElement
           label="Your Garden"
           emoji="💐"

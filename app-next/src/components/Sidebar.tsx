@@ -48,12 +48,6 @@ export const Sidebar: FC = () => {
         <div className="flex flex-col w-full">
           <ListElement label="Home" emoji="🏠" path="/" router={router} />
           <ListElement
-            label="Faucet"
-            emoji="🚰"
-            path="/faucet"
-            router={router}
-          />
-          <ListElement
             label="Your Garden"
             emoji="💐"
             path="/garden"

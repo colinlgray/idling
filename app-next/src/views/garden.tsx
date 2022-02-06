@@ -1,5 +1,6 @@
 // Next, React
 import { FC } from "react";
+import { TokenFaucet } from "../components/TokenFaucet";
 
 interface ElementProps {
   label: string;
@@ -25,6 +26,9 @@ export const GardenView: FC = ({}) => {
             <GardenElement label={"🌱"} />
             <GardenElement label={"🌳"} />
           </div>
+        </div>
+        <div className="py-4">
+          <TokenFaucet />
         </div>
       </div>
     </div>

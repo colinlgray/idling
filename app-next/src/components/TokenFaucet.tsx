@@ -75,7 +75,7 @@ export const TokenFaucet: FC<Props> = (props) => {
             update({ balance: balance + 50 });
           }}
         >
-          Get tokens
+          Get tokens 🚰
         </button>
       </div>
     </div>
