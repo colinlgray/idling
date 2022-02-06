@@ -9,13 +9,13 @@ export function loadKeypair(path: string): web3.Keypair {
 }
 
 export const plantMintKeypairs = [
-  loadKeypair("./plant-mint-keypair-1.json"),
-  loadKeypair("./plant-mint-keypair-2.json"),
-  loadKeypair("./plant-mint-keypair-3.json"),
-  loadKeypair("./plant-mint-keypair-4.json"),
+  loadKeypair("./keypairs/plant-mint-keypair-1.json"),
+  loadKeypair("./keypairs/plant-mint-keypair-2.json"),
+  loadKeypair("./keypairs/plant-mint-keypair-3.json"),
+  loadKeypair("./keypairs/plant-mint-keypair-4.json"),
 ];
-export const treasuryKeypair = loadKeypair("./testkey.json");
-export const playerKeypair = loadKeypair("./player-keypair.json");
+export const treasuryKeypair = loadKeypair("./keypairs/testkey.json");
+export const playerKeypair = loadKeypair("./keypairs/player-keypair.json");
 
 export const airdrop = async (address: web3.PublicKey, amount: number) => {
   const provider = Provider.env();
