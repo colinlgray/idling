@@ -13,7 +13,7 @@ pub struct InitPlant<'info> {
       payer = authority,
       space = Plant::SIZE,
       seeds = [PLANT_PREFIX, &plant_mint.key().to_bytes()],
-      bump = plant_bump,
+      bump,
     )]
     pub plant: Account<'info, Plant>,
 

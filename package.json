@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@project-serum/anchor": "^0.20"
+    "@project-serum/anchor": "^0.21"
   },
   "devDependencies": {
     "@solana/spl-token": "^0.1.8",
