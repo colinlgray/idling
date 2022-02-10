@@ -1,5 +1,6 @@
 import { FC } from "react";
 import { useRouter, NextRouter } from "next/router";
+import { appRoutes } from "../models/routes";
 import Link from "next/link";
 
 interface ListElementProps {
@@ -46,25 +47,15 @@ export const Sidebar: FC = () => {
       </div>
       <div className="sidebar-content px-4 py-6">
         <div className="flex flex-col w-full">
-          <ListElement label="Home" emoji="🏠" path="/" router={router} />
-          <ListElement
-            label="Your Garden"
-            emoji="💐"
-            path="/garden"
-            router={router}
-          />
-          <ListElement
-            label="Your inventory"
-            emoji="💰"
-            path="/inventory"
-            router={router}
-          />
-          <ListElement
-            label="Leaderboard"
-            emoji="📈"
-            path="/leaderboard"
-            router={router}
-          />
+          {appRoutes.map((r) => (
+            <ListElement
+              label={r.label}
+              emoji={r.emoji}
+              path={r.path}
+              router={router}
+              key={r.label}
+            />
+          ))}
         </div>
       </div>
     </aside>

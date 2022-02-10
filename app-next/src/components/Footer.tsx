@@ -1,6 +1,7 @@
 import { FC } from "react";
 import Link from "next/link";
 import { useRouter, NextRouter } from "next/router";
+import { appRoutes } from "../models/routes";
 
 interface ListElementProps {
   label: string;
@@ -13,9 +14,9 @@ const ListElement: FC<ListElementProps> = (props) => {
   let linkClassName =
     "flex flex-row items-center h-10 px-3 rounded-lg text-gray-100 bg-gray-700 border border-2";
   if (props.router.pathname === props.path) {
-    linkClassName += " border-gray-100";
-  } else {
     linkClassName += " border-gray-700";
+  } else {
+    linkClassName += " border-gray-100";
   }
   return (
     <div className="my-px">
@@ -35,25 +36,15 @@ export const Footer: FC = () => {
   return (
     <footer className="footer px-4 py-6">
       <div className="flex md:hidden">
-        <ListElement label="Home" emoji="🏠" path="/" router={router} />
-        <ListElement
-          label="Your Garden"
-          emoji="💐"
-          path="/garden"
-          router={router}
-        />
-        <ListElement
-          label="Your inventory"
-          emoji="💰"
-          path="/inventory"
-          router={router}
-        />
-        <ListElement
-          label="Leaderboard"
-          emoji="📈"
-          path="/leaderboard"
-          router={router}
-        />
+        {appRoutes.map((r) => (
+          <ListElement
+            label={r.label}
+            emoji={r.emoji}
+            path={r.path}
+            router={router}
+            key={r.label}
+          />
+        ))}
       </div>
     </footer>
   );
