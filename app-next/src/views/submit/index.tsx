@@ -1,7 +1,34 @@
 // Next, React
 import { FC } from "react";
 
+const SubmitModal: FC<{ modalId: string }> = ({ modalId }) => {
+  return (
+    <>
+      <input type="checkbox" id={modalId} className="modal-toggle" />
+      <div className="modal">
+        <div className="modal-box">
+          <div className="grid grid-cols-2">
+            <div>item 1</div>
+            <div>
+              <input min="0" max="10" />
+            </div>
+          </div>
+          <div className="modal-action">
+            <label htmlFor={modalId} className="btn btn-primary">
+              Accept
+            </label>
+            <label htmlFor={modalId} className="btn">
+              Close
+            </label>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
 export const SubmitView: FC = ({}) => {
+  const modalId = "submit-modal";
   return (
     <>
       <div className="hero mx-auto min-h-16">
@@ -14,7 +41,7 @@ export const SubmitView: FC = ({}) => {
             <div className="flex justify-center">
               <div>
                 <label
-                  htmlFor="my-modal-2"
+                  htmlFor={modalId}
                   className="btn btn-primary modal-button"
                 >
                   Submit for judging
@@ -24,21 +51,7 @@ export const SubmitView: FC = ({}) => {
           </div>
         </div>
       </div>
-
-      <input type="checkbox" id="my-modal-2" className="modal-toggle" />
-      <div className="modal">
-        <div className="modal-box">
-          <p>Judging period has not started yet</p>
-          <div className="modal-action">
-            <label htmlFor="my-modal-2" className="btn btn-primary">
-              Accept
-            </label>
-            <label htmlFor="my-modal-2" className="btn">
-              Close
-            </label>
-          </div>
-        </div>
-      </div>
+      <SubmitModal modalId={modalId} />
     </>
   );
 };
