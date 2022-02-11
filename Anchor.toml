@@ -1,6 +1,7 @@
 [programs.localnet]
 idling = "3gTqaTAKfq6h41XDSFb2iUZt8bXFKTpbU3nsxbBzipcN"
 idle_plants = "4H8FuFgabDNba1S8KPLjcni2zBGV2GK8DeffDwtU535f"
+leaderboard = "4TytLcPefVMwAtTwDwMXBDQQKn1gG8CjejbVVqSouQQ2"
 
 [registry]
 url = "https://anchor.projectserum.com"
