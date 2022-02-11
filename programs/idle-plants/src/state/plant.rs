@@ -12,6 +12,8 @@ pub struct PlantData {
     pub time_till_thirsty: i64,
     /// Cost to begin growing the plant
     pub cost: u64,
+    /// What the plant is worth in a leaderboard per atomic unit
+    pub worth: u64,
 }
 
 #[account]

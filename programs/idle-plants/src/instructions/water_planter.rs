@@ -33,7 +33,7 @@ pub fn handler(ctx: Context<WaterPlanter>) -> ProgramResult {
         return Err(IdlePlantsError::PlantAtMaxWaterings.into());
     }
 
-    planter.times_watered += 1;
+    planter.times_watered = planter.times_watered.saturating_add(1);
     planter.last_watered = now;
 
     Ok(())

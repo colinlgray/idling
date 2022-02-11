@@ -11,6 +11,10 @@ import {
   playerKeypair,
 } from "./common";
 import { IdlePlants } from "../target/types/idle_plants";
+import dayjs, { Dayjs } from "dayjs";
+import utc from "dayjs/plugin/utc";
+import { Leaderboard } from "../target/types/leaderboard";
+dayjs.extend(utc);
 
 const systemProgram = web3.SystemProgram.programId;
 const tokenProgram = splToken.TOKEN_PROGRAM_ID;
@@ -19,6 +23,10 @@ const rent = web3.SYSVAR_RENT_PUBKEY;
 
 const idling = anchor.workspace.Idling as Program<Idling>;
 const idlePlants = anchor.workspace.IdlePlants as Program<IdlePlants>;
+const leaderboard = anchor.workspace.Leaderboard as Program<Leaderboard>;
+console.log("========================");
+console.log(leaderboard);
+console.log(leaderboard.programId);
 
 const treasuryAuthority = treasuryKeypair;
 let provider = anchor.Provider.env();
@@ -184,24 +192,28 @@ describe("idle-plants", () => {
       requiredWaterings: 1,
       timeTillThirsty: new anchor.BN(2),
       cost: new anchor.BN(50),
+      worth: new anchor.BN(10),
     },
     {
       maxGrowth: new anchor.BN(60),
       requiredWaterings: 3,
       timeTillThirsty: new anchor.BN(6),
       cost: new anchor.BN(100),
+      worth: new anchor.BN(20),
     },
     {
       maxGrowth: new anchor.BN(300),
       requiredWaterings: 5,
       timeTillThirsty: new anchor.BN(10),
       cost: new anchor.BN(500),
+      worth: new anchor.BN(30),
     },
     {
       maxGrowth: new anchor.BN(2000),
       requiredWaterings: 10,
       timeTillThirsty: new anchor.BN(20),
       cost: new anchor.BN(5000),
+      worth: new anchor.BN(40),
     },
   ];
 
@@ -396,5 +408,85 @@ describe("idle-plants", () => {
       playerPlantAcct.amount.lte(plantData[0].maxGrowth),
       "harvest to be <= maxGrowth"
     ).to.be.true;
+  });
+});
+
+describe("leaderboard", () => {
+  const start = dayjs.utc().add(1, "h").unix();
+  const end = dayjs.utc().add(1, "w").unix();
+  const week = "0";
+  const year = "2022";
+  let leaderboardPubkey: web3.PublicKey;
+  let playerEntryPubkey: web3.PublicKey;
+
+  before(async () => {
+    [leaderboardPubkey] = await web3.PublicKey.findProgramAddress(
+      [Buffer.from(week), Buffer.from(year)],
+      leaderboard.programId
+    );
+
+    [playerEntryPubkey] = await web3.PublicKey.findProgramAddress(
+      [leaderboardPubkey.toBuffer(), playerWallet.publicKey.toBuffer()],
+      leaderboard.programId
+    );
+  });
+
+  it("initializes a leaderboard", async () => {
+    let tx = await leaderboard.rpc.initLeaderboard(
+      week,
+      year,
+      new anchor.BN(start),
+      new anchor.BN(end),
+      {
+        accounts: {
+          leaderboard: leaderboardPubkey,
+          authority: treasuryAuthority.publicKey,
+          systemProgram,
+          rent,
+        },
+        //TODO: DO SOMETHING MORE SECURE
+        signers: [treasuryAuthority],
+      }
+    );
+
+    await provider.connection.confirmTransaction(tx, "confirmed");
+
+    let newLeaderboard = await leaderboard.account.leaderboard.fetch(
+      leaderboardPubkey
+    );
+    expect(newLeaderboard.totalBurned.eqn(0)).to.be.true;
+  });
+
+  it("submits a plant to the leaderboard", async () => {
+    let playerPlantAcct = await testPlantMint.getOrCreateAssociatedAccountInfo(
+      playerWallet.publicKey
+    );
+
+    let tx = await leaderboard.rpc.submitPlant(new anchor.BN(1), {
+      accounts: {
+        owner: playerWallet.publicKey,
+        leaderboard: leaderboardPubkey,
+        entry: playerEntryPubkey,
+        plant: testPlant,
+        plantMint: testPlantMint.publicKey,
+        plantTokenAccount: playerPlantAcct.address,
+        tokenProgram,
+        systemProgram,
+        rent,
+      },
+      signers: [playerWallet],
+    });
+
+    await provider.connection.confirmTransaction(tx, "confirmed");
+
+    let plant = await idlePlants.account.plant.fetch(testPlant);
+
+    let newLeaderboard = await leaderboard.account.leaderboard.fetch(
+      leaderboardPubkey
+    );
+    expect(newLeaderboard.totalBurned.eq(plant.data.worth)).to.be.true;
+
+    let playerEntry = await leaderboard.account.entry.fetch(playerEntryPubkey);
+    expect(playerEntry.share.eq(plant.data.worth)).to.be.true;
   });
 });

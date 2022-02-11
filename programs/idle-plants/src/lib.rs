@@ -1,8 +1,8 @@
 use anchor_lang::prelude::*;
 
-mod errors;
-mod instructions;
-mod state;
+pub mod errors;
+pub mod instructions;
+pub mod state;
 
 use instructions::*;
 use state::PlantData;
