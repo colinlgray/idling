@@ -1,5 +1,32 @@
 // Next, React
-import { FC } from "react";
+import { FC, useState } from "react";
+import { plantSourceData, PlantSource } from "models/plantSourceData";
+
+const EntryItem: FC<{ source: PlantSource }> = ({ source }) => {
+  const [val, setVal] = useState("0");
+  console.log("source", source);
+  return (
+    <div className="grid grid-cols-2 p-1 m-1 w-56">
+      <div>
+        <span className="px-2">{source.emojiIcon}</span>
+        {source.name}
+      </div>
+      <div className="flex px-2">
+        <input
+          value={val}
+          min="0"
+          max="10"
+          className="w-24 border-2 border-gray-100 rounded "
+          onChange={(i) => console.log(setVal(i.target.value))}
+          onFocus={(evt) => {
+            evt.target.select();
+          }}
+        />
+        <div className="px-2 underline">max</div>
+      </div>
+    </div>
+  );
+};
 
 const SubmitModal: FC<{ modalId: string }> = ({ modalId }) => {
   return (
@@ -7,18 +34,17 @@ const SubmitModal: FC<{ modalId: string }> = ({ modalId }) => {
       <input type="checkbox" id={modalId} className="modal-toggle" />
       <div className="modal">
         <div className="modal-box">
-          <div className="grid grid-cols-2">
-            <div>item 1</div>
-            <div>
-              <input min="0" max="10" />
-            </div>
+          <div className="flex flex-col items-center">
+            {plantSourceData.map((p) => (
+              <EntryItem source={p} />
+            ))}
           </div>
           <div className="modal-action">
             <label htmlFor={modalId} className="btn btn-primary">
-              Accept
+              Submit
             </label>
             <label htmlFor={modalId} className="btn">
-              Close
+              Cancel
             </label>
           </div>
         </div>
