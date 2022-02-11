@@ -14,20 +14,6 @@ const NotificationList = () => {
     (s) => s
   );
 
-  useEffect(() => {
-    if (notifications.length > 0) {
-      const id = setInterval(() => {
-        setNotificationStore((state: any) => {
-          state.notifications = notifications.slice(1, notifications.length);
-        });
-      }, 800000);
-
-      return () => {
-        clearInterval(id);
-      };
-    }
-  }, [notifications, setNotificationStore]);
-
   const reversedNotifications = [...notifications].reverse();
 
   return (
@@ -42,6 +28,15 @@ const NotificationList = () => {
             message={n.message}
             description={n.description}
             txid={n.txid}
+            onHide={() => {
+              setNotificationStore((state: any) => {
+                const reversedIndex = reversedNotifications.length - 1 - idx;
+                state.notifications = [
+                  ...notifications.slice(0, reversedIndex),
+                  ...notifications.slice(reversedIndex + 1),
+                ];
+              });
+            }}
           />
         ))}
       </div>
@@ -49,13 +44,20 @@ const NotificationList = () => {
   );
 };
 
-const Notification = ({ type, message, description, txid }) => {
+const Notification = ({ type, message, description, txid, onHide }) => {
   const { connection } = useConnection();
 
-  const [showNotification, setShowNotification] = useState(true);
 
-  if (!showNotification) return null;
 
+  useEffect(() => {
+    const id = setTimeout(() => {
+      onHide();
+    }, 8000);
+
+    return () => {
+      clearInterval(id);
+    };
+  }, [onHide]);
   // TODO: we dont have access to the network or endpoint here..
   // getExplorerUrl(connection., txid, 'tx')
   // Either a provider, context, and or wallet adapter related pro/contx need updated
@@ -120,7 +122,9 @@ const Notification = ({ type, message, description, txid }) => {
           </div>
           <div className={`ml-4 flex-shrink-0 self-start flex`}>
             <button
-              onClick={() => setShowNotification(false)}
+              onClick={() => {
+                onHide();
+              }}
               className={`bg-bkg-2 default-transition rounded-md inline-flex text-fgd-3 hover:text-fgd-4 focus:outline-none`}
             >
               <span className={`sr-only`}>Close</span>
