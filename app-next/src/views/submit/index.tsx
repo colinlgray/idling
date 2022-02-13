@@ -1,22 +1,44 @@
 // Next, React
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import { plantSourceData, PlantSource } from "models/plantSourceData";
+import { usePlanterAddresses, useAddresses, useProgram } from "hooks";
+import { useConnection } from "@solana/wallet-adapter-react";
+import { programs } from "@metaplex/js";
 
 const EntryItem: FC<{ source: PlantSource }> = ({ source }) => {
-  const [val, setVal] = useState("0");
-  console.log("source", source);
+  const { connection } = useConnection();
+  const [inputVal, setVal] = useState("0");
+  const [amount, setAmount] = useState(0);
+  const plantAddresses = usePlanterAddresses(source.plantMintPubKey);
+  const program = useProgram();
+  useEffect(() => {
+    const fetch = async () => {
+      if (!plantAddresses) return;
+      const amt = await connection.getAccountInfo(
+        plantAddresses.playerPlantRewardDest
+      );
+      if (amt) {
+        const parsed = programs.core.deserialize(amt.data);
+        setAmount(parsed.amount.toNumber());
+      }
+    };
+    fetch();
+  }, [plantAddresses]);
+
   return (
-    <div className="grid grid-cols-2 p-1 m-1 w-56">
+    <div className="grid grid-cols-2 cursor-pointer p-1 m-1 w-56">
       <div>
-        <span className="px-2">{source.emojiIcon}</span>
-        {source.name}
+        <div className="flex justify-center text-3xl border-2 border-gray-300 rounded-xl p-3 cursor-pointer relative">
+          <span className="absolute text-xs top-1 right-1">{amount || 0}</span>
+          {source.emojiIcon}
+        </div>
       </div>
       <div className="flex px-2">
         <input
-          value={val}
+          value={inputVal}
           min="0"
           max="10"
-          className="w-24 border-2 border-gray-100 rounded "
+          className="w-24 border-2 border-gray-100 rounded text-center text-xl"
           onChange={(i) => console.log(setVal(i.target.value))}
           onFocus={(evt) => {
             evt.target.select();
@@ -29,6 +51,7 @@ const EntryItem: FC<{ source: PlantSource }> = ({ source }) => {
 };
 
 const SubmitModal: FC<{ modalId: string }> = ({ modalId }) => {
+  const addresses = useAddresses();
   return (
     <>
       <input type="checkbox" id={modalId} className="modal-toggle" />
@@ -36,7 +59,7 @@ const SubmitModal: FC<{ modalId: string }> = ({ modalId }) => {
         <div className="modal-box">
           <div className="flex flex-col items-center">
             {plantSourceData.map((p) => (
-              <EntryItem source={p} />
+              <EntryItem key={p.name} source={p} />
             ))}
           </div>
           <div className="modal-action">

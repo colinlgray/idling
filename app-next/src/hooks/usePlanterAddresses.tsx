@@ -24,11 +24,6 @@ export function usePlanterAddresses(
     const fetchAddresses = async () => {
       if (!wallet || !program) return;
       try {
-        const [playerClicker] = await web3.PublicKey.findProgramAddress(
-          [Buffer.from("clicker"), wallet.publicKey.toBuffer()],
-          program.idling.programId
-        );
-
         const [plant, plantBump] = await web3.PublicKey.findProgramAddress(
           [Buffer.from("plant"), plantMintPubKey.toBuffer()],
           program.idlePlants.programId
