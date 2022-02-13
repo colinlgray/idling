@@ -1,4 +1,8 @@
+use std::mem::size_of;
+
 use anchor_lang::prelude::*;
+
+use super::PlanterBuff;
 
 pub const PLANTER_PREFIX: &[u8] = b"planter";
 
@@ -16,4 +20,10 @@ pub struct Planter {
     pub last_watered: i64,
     /// bytes to use as seeds to hashing function
     pub entropy: [u8; 32],
+
+    pub active_buffs: Vec<PlanterBuff>,
+}
+
+impl Planter {
+    pub const SIZE: usize = 8 + size_of::<Planter>() + (10 * size_of::<PlanterBuff>());
 }

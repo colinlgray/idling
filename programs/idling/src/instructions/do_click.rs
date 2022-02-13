@@ -83,15 +83,15 @@ pub fn handler(ctx: Context<DoClick>) -> ProgramResult {
             msg!("Attempted to claim rewards too quickly");
             return Err(ErrorCode::ClickNotReady.into());
         }
-
-        clicker.last_redeemed = now;
-        mint_to(
-            ctx.accounts
-                .grant_reward_context()
-                .with_signer(&[&treasury.authority_seeds()]),
-            CLICK_REWARD,
-        )?;
     }
+
+    clicker.last_redeemed = now;
+    mint_to(
+        ctx.accounts
+            .grant_reward_context()
+            .with_signer(&[&treasury.authority_seeds()]),
+        CLICK_REWARD,
+    )?;
 
     Ok(())
 }

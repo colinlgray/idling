@@ -16,6 +16,12 @@ import utc from "dayjs/plugin/utc";
 import { Leaderboard } from "../target/types/leaderboard";
 dayjs.extend(utc);
 
+// BuffType rust enum used for the program's RPC API.
+const BuffType = {
+  Cost: { cost: {} },
+  Time: { time: {} },
+};
+
 const systemProgram = web3.SystemProgram.programId;
 const tokenProgram = splToken.TOKEN_PROGRAM_ID;
 const associatedTokenProgram = splToken.ASSOCIATED_TOKEN_PROGRAM_ID;
@@ -24,9 +30,6 @@ const rent = web3.SYSVAR_RENT_PUBKEY;
 const idling = anchor.workspace.Idling as Program<Idling>;
 const idlePlants = anchor.workspace.IdlePlants as Program<IdlePlants>;
 const leaderboard = anchor.workspace.Leaderboard as Program<Leaderboard>;
-console.log("========================");
-console.log(leaderboard);
-console.log(leaderboard.programId);
 
 const treasuryAuthority = treasuryKeypair;
 let provider = anchor.Provider.env();
@@ -40,12 +43,16 @@ let playerClicker: web3.PublicKey;
 let playerRewardDest: web3.PublicKey;
 let playerTestPlantPlanter: web3.PublicKey;
 let playerTestPlantRewardDest: web3.PublicKey;
+let playerItemDest: web3.PublicKey;
 
 const testPlantMintKeypair = plantMintKeypairs[0];
 let testPlantMint: splToken.Token;
 let testPlants: { plant: web3.PublicKey; bump: number }[];
 let testPlant: web3.PublicKey;
-let testPlantBump: number;
+
+let recipePubkey: web3.PublicKey;
+let itemKeypair: web3.Keypair;
+let itemMint: splToken.Token;
 
 describe("idling", () => {
   before(async () => {
@@ -114,8 +121,8 @@ describe("idling", () => {
       await treasuryMint.getOrCreateAssociatedAccountInfo(
         playerWallet.publicKey
       );
-    expect(playerRewardDestAcct.amount.eqn(0), "player account has 0 tokens").to
-      .be.true;
+    expect(playerRewardDestAcct.amount.eqn(50), "player account has 50 tokens")
+      .to.be.true;
   });
 
   it("prevents rewards from being claimed too quickly", async () => {
@@ -146,7 +153,7 @@ describe("idling", () => {
         playerWallet.publicKey
       );
     console.log(playerRewardDestAcct.amount.toString());
-    expect(playerRewardDestAcct.amount.eqn(0), "player acccount has 0 tokens")
+    expect(playerRewardDestAcct.amount.eqn(50), "player acccount has 50 tokens")
       .to.be.true;
   });
 
@@ -180,8 +187,10 @@ describe("idling", () => {
         playerWallet.publicKey
       );
     console.log(playerRewardDestAcct.amount.toString());
-    expect(playerRewardDestAcct.amount.eqn(50), "player account has 50 tokens")
-      .to.be.true;
+    expect(
+      playerRewardDestAcct.amount.eqn(100),
+      "player account has 100 tokens"
+    ).to.be.true;
   });
 });
 
@@ -233,7 +242,6 @@ describe("idle-plants", () => {
     );
 
     testPlant = testPlants[0].plant;
-    testPlantBump = testPlants[0].bump;
 
     [playerTestPlantPlanter] = await web3.PublicKey.findProgramAddress(
       [
@@ -256,6 +264,24 @@ describe("idle-plants", () => {
       testPlantMintKeypair.publicKey,
       splToken.TOKEN_PROGRAM_ID,
       playerWallet
+    );
+
+    itemKeypair = web3.Keypair.generate();
+    [recipePubkey] = await web3.PublicKey.findProgramAddress(
+      [Buffer.from("recipe"), itemKeypair.publicKey.toBuffer()],
+      idlePlants.programId
+    );
+    itemMint = new splToken.Token(
+      provider.connection,
+      itemKeypair.publicKey,
+      splToken.TOKEN_PROGRAM_ID,
+      playerWallet
+    );
+    playerItemDest = await splToken.Token.getAssociatedTokenAddress(
+      splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
+      splToken.TOKEN_PROGRAM_ID,
+      itemMint.publicKey,
+      playerWallet.publicKey
     );
   });
 
@@ -303,12 +329,8 @@ describe("idle-plants", () => {
       await treasuryMint.getOrCreateAssociatedAccountInfo(
         playerWallet.publicKey
       );
-    console.log(
-      "balance after planting",
-      playerRewardDestAcct.amount.toString()
-    );
-    expect(playerRewardDestAcct.amount.eqn(0), "player account has 0 tokens").to
-      .be.true;
+    expect(playerRewardDestAcct.amount.eqn(50), "player account has 50 tokens")
+      .to.be.true;
   });
 
   it("prevents immediate watering", async () => {
@@ -403,10 +425,93 @@ describe("idle-plants", () => {
     let playerPlantAcct = await testPlantMint.getOrCreateAssociatedAccountInfo(
       playerWallet.publicKey
     );
-    console.log("balance after harvest", playerPlantAcct.amount.toString());
     expect(
       playerPlantAcct.amount.lte(plantData[0].maxGrowth),
       "harvest to be <= maxGrowth"
+    ).to.be.true;
+  });
+
+  it("creates a recipe", async () => {
+    let tx = await idlePlants.rpc.initRecipe(
+      {
+        waterCost: new anchor.BN(50),
+        buffs: [{ buffType: BuffType.Time, percentage: 5000 }],
+        costs: [{ mint: testPlantMint.publicKey, amount: new anchor.BN(1) }],
+      },
+      {
+        accounts: {
+          recipe: recipePubkey,
+          itemMint: itemKeypair.publicKey,
+          treasury,
+          authority: treasuryAuthority.publicKey,
+          systemProgram,
+          tokenProgram,
+          rent,
+        },
+        signers: [treasuryAuthority, itemKeypair],
+      }
+    );
+
+    await provider.connection.confirmTransaction(tx, "confirmed");
+  });
+
+  it("creates an item from a plant", async () => {
+    const beforePlayerPlantTokenAcct = await testPlantMint.getAccountInfo(
+      playerTestPlantRewardDest
+    );
+    const beforePlayerRewardDestAcct = await treasuryMint.getAccountInfo(
+      playerRewardDest
+    );
+
+    const tx = await idlePlants.rpc.createItem({
+      accounts: {
+        owner: playerWallet.publicKey,
+        recipe: recipePubkey,
+        itemMint: itemMint.publicKey,
+        treasury,
+        treasuryMint: treasuryMint.publicKey,
+        treasuryTokens: playerRewardDest,
+        itemTokenAccount: playerItemDest,
+        tokenProgram,
+        associatedTokenProgram,
+        systemProgram,
+        rent,
+      },
+      signers: [playerWallet],
+      remainingAccounts: [
+        { pubkey: testPlantMint.publicKey, isSigner: false, isWritable: true },
+        {
+          pubkey: playerTestPlantRewardDest,
+          isSigner: false,
+          isWritable: true,
+        },
+      ],
+    });
+
+    await provider.connection.confirmTransaction(tx, "confirmed");
+
+    const afterPlayerRewardDestAcct = await treasuryMint.getAccountInfo(
+      playerRewardDest
+    );
+    expect(
+      beforePlayerRewardDestAcct.amount
+        .sub(afterPlayerRewardDestAcct.amount)
+        .eqn(50),
+      "charged 50 water"
+    ).to.be.true;
+
+    const afterPlayerPlantTokenAcct = await testPlantMint.getAccountInfo(
+      playerTestPlantRewardDest
+    );
+    const playerItemTokenAcct = await itemMint.getAccountInfo(playerItemDest);
+    expect(playerItemTokenAcct.amount.eqn(1), "Player item amount is 1").to.be
+      .true;
+
+    expect(
+      beforePlayerPlantTokenAcct.amount
+        .sub(afterPlayerPlantTokenAcct.amount)
+        .eqn(1),
+      "charged 1 test plant"
     ).to.be.true;
   });
 });

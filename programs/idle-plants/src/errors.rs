@@ -31,4 +31,16 @@ pub enum IdlePlantsError {
 
     #[msg("The provided plant has not reached it's required watering and time yet")]
     PlantNotGrown,
+
+    #[msg("An expected PDA bump was missing in the anchor bumps tree")]
+    MissingBump,
+
+    #[msg("Invalid buff percentage. Must be <= 10000")]
+    InvalidBuffPercentage,
+
+    #[msg("Not enough plant token accounts in remaining accounts")]
+    NotEnoughPlantTokenAccounts,
+
+    #[msg("One of the provided token accounts is not for a mint in the item costs")]
+    InvalidTokenAccountForItemCost,
 }

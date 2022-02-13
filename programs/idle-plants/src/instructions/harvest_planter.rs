@@ -82,7 +82,7 @@ pub fn handler(ctx: Context<HarvestPlanter>) -> ProgramResult {
         &id(),
     );
 
-    let rewards = random(
+    let mut rewards = random(
         &[
             &harvest_entropy.to_bytes(),
             &planter.entropy,
@@ -91,6 +91,11 @@ pub fn handler(ctx: Context<HarvestPlanter>) -> ProgramResult {
         ],
         plant.data.max_growth,
     );
+
+    //ensure at least 1 reward token
+    if rewards == 0 {
+        rewards = 1;
+    }
 
     mint_to(
         ctx.accounts.mint_harvest_ctx().with_signer(&[&[
