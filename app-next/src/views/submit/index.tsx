@@ -26,25 +26,36 @@ const EntryItem: FC<{ source: PlantSource }> = ({ source }) => {
   }, [plantAddresses]);
 
   return (
-    <div className="grid grid-cols-2 cursor-pointer p-1 m-1 w-56">
+    <div className="grid grid-cols-3 cursor-pointer p-1 m-1">
       <div>
         <div className="flex justify-center text-3xl border-2 border-gray-300 rounded-xl p-3 cursor-pointer relative">
           <span className="absolute text-xs top-1 right-1">{amount || 0}</span>
           {source.emojiIcon}
         </div>
       </div>
-      <div className="flex px-2">
+      <div className="flex px-2 justify-center">
         <input
           value={inputVal}
           min="0"
-          max="10"
+          max={amount}
+          type="range"
           className="w-24 border-2 border-gray-100 rounded text-center text-xl"
           onChange={(i) => console.log(setVal(i.target.value))}
           onFocus={(evt) => {
             evt.target.select();
           }}
         />
-        <div className="px-2 underline">max</div>
+      </div>
+      <div className="flex px-2 justify-center items-center">
+        {inputVal}/{amount}
+        <a
+          className="px-2 underline"
+          onClick={() => {
+            setVal(amount.toString());
+          }}
+        >
+          max
+        </a>
       </div>
     </div>
   );
