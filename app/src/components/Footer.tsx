@@ -34,8 +34,8 @@ const ListElement: FC<ListElementProps> = (props) => {
 export const Footer: FC = () => {
   const router = useRouter();
   return (
-    <footer className="footer px-4 py-6">
-      <div className="flex md:hidden">
+    <footer className="md:hidden footer px-4 py-6">
+      <div className="flex">
         {appRoutes.map((r) => (
           <ListElement
             label={r.label}
