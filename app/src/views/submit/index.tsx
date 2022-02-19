@@ -69,47 +69,21 @@ const EntryItem: FC<EntryItemProps> = ({ source, inputVal, onInputChange }) => {
   );
 };
 
-const SubmitModal: FC<{ modalId: string }> = ({ modalId }) => {
+const SubmitModal: FC<{}> = () => {
   const addresses = useAddresses();
   const [inputValues, setInputValues] = useState(
     plantSourceData.map(() => "0")
   );
   return (
     <>
-      <input type="checkbox" id={modalId} className="modal-toggle" />
-      <div className="modal">
-        <div className="modal-box">
-          <div className="flex flex-col items-center">
-            {plantSourceData.map((p, idx) => (
-              <EntryItem
-                key={p.name}
-                source={p}
-                inputVal={inputValues[idx]}
-                onInputChange={(newVal) => {
-                  let clone = Array.from(inputValues);
-                  clone[idx] = newVal;
-                  setInputValues(clone);
-                }}
-              />
-            ))}
-          </div>
-          <div className="modal-action">
-            <label
-              htmlFor={modalId}
-              className="btn btn-primary"
-              onClick={() => {
-                submitGoods({
-                  plants: plantSourceData,
-                  amounts: inputValues.map((s) => Number.parseInt(s)),
-                });
-              }}
-            >
-              Submit
-            </label>
-            <label htmlFor={modalId} className="btn">
-              Cancel
-            </label>
-          </div>
+      <div className="bg-gray-500 rounded">
+        <div className="flex flex-col items-center">
+          {plantSourceData.map((p) => (
+            <EntryItem key={p.name} source={p} />
+          ))}
+        </div>
+        <div className="flex justify-end p-2">
+          <label className="btn btn-primary">Submit</label>
         </div>
       </div>
     </>
@@ -117,30 +91,20 @@ const SubmitModal: FC<{ modalId: string }> = ({ modalId }) => {
 };
 
 export const SubmitView: FC = ({}) => {
-  const modalId = "submit-modal";
   return (
     <>
-      <div className="hero mx-auto min-h-16">
+      <div className="hero mx-auto h-60">
         <div className="hero-content flex flex-col max-w-lg justify-center">
           <h2 className="text-xl">Show me what you got</h2>
           <div className="container mx-auto ">
-            <div className="flex justify-center py-2">
+            <div className="flex justify-center py-2 md:hidden">
               <img src="/images/show_me.png" className="h-40" />
             </div>
-            <div className="flex justify-center">
-              <div>
-                <label
-                  htmlFor={modalId}
-                  className="btn btn-primary modal-button"
-                >
-                  Submit for judging
-                </label>
-              </div>
-            </div>
+
+            <SubmitModal />
           </div>
         </div>
       </div>
-      <SubmitModal modalId={modalId} />
     </>
   );
 };
