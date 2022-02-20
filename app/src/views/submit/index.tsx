@@ -69,21 +69,45 @@ const EntryItem: FC<EntryItemProps> = ({ source, inputVal, onInputChange }) => {
   );
 };
 
-const SubmitModal: FC<{}> = () => {
+const PlantSubmissionForm: FC<{}> = () => {
   const addresses = useAddresses();
   const [inputValues, setInputValues] = useState(
     plantSourceData.map(() => "0")
   );
+  const [loading, setLoading] = useState(false);
   return (
     <>
       <div className="bg-gray-500 rounded">
         <div className="flex flex-col items-center">
-          {plantSourceData.map((p) => (
-            <EntryItem key={p.name} source={p} />
+          {plantSourceData.map((p, idx) => (
+            <EntryItem
+              key={p.name}
+              source={p}
+              inputVal={inputValues[idx]}
+              onInputChange={(newVal) => {
+                let clone = Array.from(inputValues);
+                clone[idx] = newVal;
+                setInputValues(clone);
+              }}
+            />
           ))}
         </div>
         <div className="flex justify-end p-2">
-          <label className="btn btn-primary">Submit</label>
+          <button
+            className={`btn btn-primary ${loading && "loading"}`}
+            onClick={async () => {
+              setLoading(true);
+              console.log("addresses");
+              await submitGoods({
+                addresses,
+                plants: plantSourceData,
+                amounts: inputValues.map((val) => Number.parseInt(val)),
+              });
+              setLoading(false);
+            }}
+          >
+            Submit
+          </button>
         </div>
       </div>
     </>
@@ -101,7 +125,7 @@ export const SubmitView: FC = ({}) => {
               <img src="/images/show_me.png" className="h-40" />
             </div>
 
-            <SubmitModal />
+            <PlantSubmissionForm />
           </div>
         </div>
       </div>
