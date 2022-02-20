@@ -1,0 +1,183 @@
+{
+  "version": "0.1.0",
+  "name": "leaderboard",
+  "instructions": [
+    {
+      "name": "initLeaderboard",
+      "accounts": [
+        {
+          "name": "leaderboard",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "week",
+          "type": "string"
+        },
+        {
+          "name": "year",
+          "type": "string"
+        },
+        {
+          "name": "start",
+          "type": "i64"
+        },
+        {
+          "name": "end",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "submitPlant",
+      "accounts": [
+        {
+          "name": "owner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "leaderboard",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "entry",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "plant",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "plantMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "plantTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Entry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "leaderboard",
+            "type": "publicKey"
+          },
+          {
+            "name": "owner",
+            "type": "publicKey"
+          },
+          {
+            "name": "share",
+            "type": "u64"
+          },
+          {
+            "name": "initialized",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Leaderboard",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "totalBurned",
+            "type": "u64"
+          },
+          {
+            "name": "startTimestamp",
+            "type": "i64"
+          },
+          {
+            "name": "endTimestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidStartTime",
+      "msg": "The provided start time is in the past"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidEndTime",
+      "msg": "The provided end time is not valid"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidMintForPlant",
+      "msg": "The provided mint is not valid for the plant mint"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidTokenAccountForPlant",
+      "msg": "The provided token account is not valid for the plant mint"
+    },
+    {
+      "code": 6004,
+      "name": "TokenAccountNotOwned",
+      "msg": "The provided token account is not owned by the current user"
+    },
+    {
+      "code": 6005,
+      "name": "EntryNotOwned",
+      "msg": "The entry is not owned is not owned by the current user"
+    }
+  ]
+}

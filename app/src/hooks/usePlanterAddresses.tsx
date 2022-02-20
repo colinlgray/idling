@@ -1,4 +1,4 @@
-import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useProgram } from "./useProgram";
 import { PublicKey } from "@solana/web3.js";
 import { web3 } from "@project-serum/anchor";
@@ -18,11 +18,12 @@ export function usePlanterAddresses(
 ): PlanterAddresses | null {
   const wallet = useAnchorWallet();
   const program = useProgram();
+  const connection = useConnection();
   const [addresses, setAddresses] = useState(null);
 
   useEffect(() => {
     const fetchAddresses = async () => {
-      if (!wallet || !program) return;
+      if (!wallet || !program || !connection) return;
       try {
         const [plant, plantBump] = await web3.PublicKey.findProgramAddress(
           [Buffer.from("plant"), plantMintPubKey.toBuffer()],
@@ -45,6 +46,10 @@ export function usePlanterAddresses(
             plantMintPubKey,
             wallet.publicKey
           );
+
+        // const playerPlantAcct = await connection.getAccountInfo(
+        //   playerPlantRewardDest
+        // );
 
         setAddresses({
           plantMint: plantMintPubKey,

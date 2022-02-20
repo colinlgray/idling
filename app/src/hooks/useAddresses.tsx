@@ -21,12 +21,16 @@ export interface Addresses {
   playerRewardDest: PublicKey;
   playerClicker: PublicKey;
   treasuryMint: PublicKey;
+  leaderboard: PublicKey;
+  playerEntry: PublicKey;
 }
 
 export function useAddresses(): Addresses | null {
   const wallet = useAnchorWallet();
   const program = useProgram();
   const [addresses, setAddresses] = useState<Addresses | null>(null);
+  const week = "0";
+  const year = "2022";
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -37,10 +41,21 @@ export function useAddresses(): Addresses | null {
           program.idling.programId
         );
 
+        const [leaderboard] = await web3.PublicKey.findProgramAddress(
+          [Buffer.from(week), Buffer.from(year)],
+          program.leaderboard.programId
+        );
+
+        const [playerEntry] = await web3.PublicKey.findProgramAddress(
+          [leaderboard.toBuffer(), wallet.publicKey.toBuffer()],
+          program.leaderboard.programId
+        );
+
         const [treasuryMintAuthority] = await web3.PublicKey.findProgramAddress(
           [Buffer.from("treasury"), Buffer.from("mint")],
           program.idling.programId
         );
+
         let data: null | AccountData = null;
         if (program?.idling.account.treasury) {
           data = (await program.idling.account.treasury.fetchNullable(
@@ -68,6 +83,8 @@ export function useAddresses(): Addresses | null {
           playerRewardDest,
           playerClicker,
           treasuryMint: data.mint,
+          leaderboard,
+          playerEntry,
         });
       } catch (e) {
         console.error(e);

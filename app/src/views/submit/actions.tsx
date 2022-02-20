@@ -14,6 +14,9 @@ export const submitGoods = async ({
   console.log("plants", plants);
   console.log("addresses", addresses);
   console.log("playerWallet.,playerWalletpublicKey");
+  // const playerPlantAcct = await connection.getAccountInfo(
+  //   addresses.playerRewardDest
+  // );
   // console.log("leaderboardPubkey", leaderboardPubkey);
   // console.log("playerEntryPubkey", playerEntryPubkey);
   // console.log("testPlant", testPlant);
