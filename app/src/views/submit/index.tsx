@@ -2,7 +2,7 @@
 import { FC, useState, useEffect } from "react";
 import { plantSourceData, PlantSource } from "models/plantSourceData";
 import { usePlanterAddresses, useAddresses, useProgram } from "hooks";
-import { useConnection } from "@solana/wallet-adapter-react";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { programs } from "@metaplex/js";
 import { submitGoods } from "./actions";
 
@@ -16,7 +16,6 @@ const EntryItem: FC<EntryItemProps> = ({ source, inputVal, onInputChange }) => {
   const { connection } = useConnection();
   const [currentHoldings, setAmount] = useState(0);
   const plantAddresses = usePlanterAddresses(source.plantMintPubKey);
-  const program = useProgram();
   useEffect(() => {
     const fetch = async () => {
       if (!plantAddresses) return;
@@ -71,10 +70,27 @@ const EntryItem: FC<EntryItemProps> = ({ source, inputVal, onInputChange }) => {
 
 const PlantSubmissionForm: FC<{}> = () => {
   const addresses = useAddresses();
+  const { publicKey } = useWallet();
   const [inputValues, setInputValues] = useState(
     plantSourceData.map(() => "0")
   );
   const [loading, setLoading] = useState(false);
+
+  const program = useProgram();
+
+  const onClick = async () => {
+    setLoading(true);
+    await submitGoods({
+      owner: publicKey,
+      addresses,
+      plants: plantSourceData,
+      amounts: inputValues.map((val) => Number.parseInt(val)),
+      leaderboard: program.leaderboard,
+    });
+    setLoading(false);
+  };
+  (window as any).asd = onClick;
+
   return (
     <>
       <div className="bg-gray-500 rounded">
@@ -95,16 +111,7 @@ const PlantSubmissionForm: FC<{}> = () => {
         <div className="flex justify-end p-2">
           <button
             className={`btn btn-primary ${loading && "loading"}`}
-            onClick={async () => {
-              setLoading(true);
-              console.log("addresses");
-              await submitGoods({
-                addresses,
-                plants: plantSourceData,
-                amounts: inputValues.map((val) => Number.parseInt(val)),
-              });
-              setLoading(false);
-            }}
+            onClick={onClick}
           >
             Submit
           </button>

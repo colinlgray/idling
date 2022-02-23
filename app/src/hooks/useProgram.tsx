@@ -10,6 +10,8 @@ const opts: ConfirmOptions = {
   preflightCommitment: "processed",
 };
 
+export const leaderboardIdlTwo = leaderboardIdl;
+
 const idlingProgramId = "3gTqaTAKfq6h41XDSFb2iUZt8bXFKTpbU3nsxbBzipcN";
 const plantsProgramId = "4H8FuFgabDNba1S8KPLjcni2zBGV2GK8DeffDwtU535f";
 const leaderboardProgramId = "4TytLcPefVMwAtTwDwMXBDQQKn1gG8CjejbVVqSouQQ2";
