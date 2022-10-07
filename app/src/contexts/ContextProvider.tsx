@@ -48,7 +48,7 @@ const WalletContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const onError = useCallback((error: WalletError) => {
     notify({
       type: "error",
-      message: error.message ? `${error.name}: ${error.message}` : error.name,
+      message: "Please make sure your wallet is connected to Devnet",
     });
     console.error(error);
   }, []);
