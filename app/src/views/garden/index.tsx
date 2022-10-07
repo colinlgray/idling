@@ -22,6 +22,7 @@ export const GardenView: FC = ({}) => {
             {plantSourceData.map((p) => (
               <PlanterInterface
                 plantMint={p.plantMintPubKey}
+                key={p.name}
                 label={p.emojiIcon}
               />
             ))}
