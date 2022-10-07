@@ -26,7 +26,6 @@ export const submitGoods = async ({
   console.log("plants", plants);
   console.log("addresses", addresses.leaderboard);
   console.log("leaderboard", leaderboard);
-  (window as any).asdf = leaderboard;
   // const playerPlantAcct = await connection.getAccountInfo(
   //   addresses.playerRewardDest
   // );
@@ -41,7 +40,6 @@ export const submitGoods = async ({
 
   async function createTransaction(amount: number, plant: PlantSource) {
     console.log(`create transaction for ${amount} ${plant.name}`);
-    leaderboard.instruction.su;
     let tx = await leaderboard.rpc.submitPlant(new BN(amount), {
       accounts: {
         owner,
@@ -58,11 +56,11 @@ export const submitGoods = async ({
   }
 
   let txs = [];
-  amounts.forEach((a, idx) => {
-    if (a > 0) {
-      txs.push(createTransaction(a, plants[idx]));
-    }
-  });
+  // amounts.forEach((a, idx) => {
+  //   if (a > 0) {
+  //     txs.push(createTransaction(a, plants[idx]));
+  //   }
+  // });
   return new Promise((res) => {
     setTimeout(res, 1000);
   });
