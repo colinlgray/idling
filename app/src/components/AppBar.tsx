@@ -14,7 +14,12 @@ export const AppBar: FC = (props) => {
         <div className="flex md:hidden"></div>
         <div className="flex justify-between w-full">
           <PointsDisplay />
-          <WalletMultiButton className="btn btn-ghost mr-2" />
+          <div className="flex">
+            <div className="text-yellow-500 rounded flex items-center px-4">
+              Devnet ⚠️
+            </div>
+            <WalletMultiButton className="btn btn-ghost mr-2" />
+          </div>
         </div>
       </div>
     </header>
