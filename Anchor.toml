@@ -1,4 +1,4 @@
-[programs.localnet]
+[programs.devnet]
 idling = "3gTqaTAKfq6h41XDSFb2iUZt8bXFKTpbU3nsxbBzipcN"
 idle_plants = "4H8FuFgabDNba1S8KPLjcni2zBGV2GK8DeffDwtU535f"
 leaderboard = "4TytLcPefVMwAtTwDwMXBDQQKn1gG8CjejbVVqSouQQ2"
@@ -7,7 +7,7 @@ leaderboard = "4TytLcPefVMwAtTwDwMXBDQQKn1gG8CjejbVVqSouQQ2"
 url = "https://anchor.projectserum.com"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "./keypairs/testkey.json"
 
 [scripts]

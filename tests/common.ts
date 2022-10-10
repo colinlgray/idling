@@ -1,5 +1,10 @@
 import fs from "fs";
-import { workspace, web3, Program, Provider } from "@project-serum/anchor";
+import {
+  workspace,
+  web3,
+  Program,
+  AnchorProvider,
+} from "@project-serum/anchor";
 import { Idling } from "../target/types/idling";
 
 export function loadKeypair(path: string): web3.Keypair {
@@ -18,7 +23,7 @@ export const treasuryKeypair = loadKeypair("./keypairs/testkey.json");
 export const playerKeypair = loadKeypair("./keypairs/player-keypair.json");
 
 export const airdrop = async (address: web3.PublicKey, amount: number) => {
-  const provider = Provider.env();
+  const provider = AnchorProvider.env();
   await provider.connection.confirmTransaction(
     await provider.connection.requestAirdrop(
       address,

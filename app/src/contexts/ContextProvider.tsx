@@ -26,9 +26,9 @@ const WalletContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   {
     /* TODO: UPDATE CLUSTER PER NETWORK SETTINGS, ADD LOCALHOST + CUSTOMNET | ADAPTER REWORK */
   }
-  //   const network = WalletAdapterNetwork.Devnet;
-  //   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
-  const endpoint = "http://127.0.0.1:8899";
+  const network = WalletAdapterNetwork.Devnet;
+  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  // const endpoint = "http://127.0.0.1:8899";
 
   const wallets = useMemo(
     () => [

@@ -29,7 +29,7 @@ console.log(leaderboard);
 console.log(leaderboard.programId);
 
 const treasuryAuthority = treasuryKeypair;
-let provider = anchor.Provider.env();
+let provider = anchor.AnchorProvider.env();
 
 let treasury: web3.PublicKey;
 let treasuryMintAuthority: web3.PublicKey;
