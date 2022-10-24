@@ -89,7 +89,6 @@ const PlantSubmissionForm: FC<{}> = () => {
     });
     setLoading(false);
   };
-  (window as any).asd = onClick;
 
   return (
     <>
