@@ -21,11 +21,11 @@ const ListElement: FC<ListElementProps> = (props) => {
   return (
     <div className="my-px">
       <Link href={props.path}>
-        <a className={linkClassName}>
+        <div className={linkClassName}>
           <span className="flex items-center justify-center text-lg text-gray-400">
             {props.emoji}
           </span>
-        </a>
+        </div>
       </Link>
     </div>
   );
