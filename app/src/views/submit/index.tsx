@@ -5,6 +5,7 @@ import { usePlanterAddresses, useAddresses, useProgram } from "hooks";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { programs } from "@metaplex/js";
 import { submitGoods } from "./actions";
+import { Spinner } from "components/Spinner";
 
 interface EntryItemProps {
   source: PlantSource;
@@ -15,6 +16,8 @@ interface EntryItemProps {
 const EntryItem: FC<EntryItemProps> = ({ source, inputVal, onInputChange }) => {
   const { connection } = useConnection();
   const [currentHoldings, setAmount] = useState(0);
+  const [loadingHoldings, setLoading] = useState(true);
+
   const plantAddresses = usePlanterAddresses(source.plantMintPubKey);
   useEffect(() => {
     const fetch = async () => {
@@ -26,7 +29,10 @@ const EntryItem: FC<EntryItemProps> = ({ source, inputVal, onInputChange }) => {
         const parsed = programs.core.deserialize(amt.data);
         setAmount(parsed.amount.toNumber());
       }
+      setLoading(false);
     };
+
+    setLoading(true);
     fetch();
   }, [plantAddresses]);
 
@@ -35,7 +41,12 @@ const EntryItem: FC<EntryItemProps> = ({ source, inputVal, onInputChange }) => {
       <div>
         <div className="flex justify-center text-3xl border-2 border-gray-300 rounded-xl p-3 cursor-pointer relative">
           <span className="absolute text-xs top-1 right-1">
-            {currentHoldings || 0}
+            {!loadingHoldings && <div>{currentHoldings}</div>}
+            {loadingHoldings && (
+              <div className="w-4 h-4">
+                <Spinner />
+              </div>
+            )}
           </span>
           {source.emojiIcon}
         </div>
