@@ -2,6 +2,7 @@ import { PlantSource } from "models/plantSourceData";
 import { Addresses } from "../../hooks/useAddresses";
 import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
 
+import { Transaction } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { Idl, Program, BN } from "@project-serum/anchor";
 import { leaderboardIdlTwo } from "../../hooks/useProgram";
@@ -15,6 +16,8 @@ interface SubmitProps {
   addresses: Addresses;
   owner: PublicKey;
   leaderboard: Program;
+  wallet: any;
+  connection: any;
 }
 export const submitGoods = async ({
   plants,
@@ -22,10 +25,12 @@ export const submitGoods = async ({
   addresses,
   owner,
   leaderboard,
+  wallet,
+  connection,
 }: SubmitProps) => {
-  console.log("plants", plants);
-  console.log("addresses", addresses.leaderboard);
-  console.log("leaderboard", leaderboard);
+  // console.log("plants", plants);
+  // console.log("addresses", addresses.leaderboard);
+  // console.log("leaderboard", leaderboard);
   // const playerPlantAcct = await connection.getAccountInfo(
   //   addresses.playerRewardDest
   // );
@@ -40,7 +45,7 @@ export const submitGoods = async ({
 
   async function createTransaction(amount: number, plant: PlantSource) {
     console.log(`create transaction for ${amount} ${plant.name}`);
-    let tx = await leaderboard.rpc.submitPlant(new BN(amount), {
+    let tx = await leaderboard.instruction.submitPlant(new BN(amount), {
       accounts: {
         owner,
         leaderboard: addresses.leaderboard,
@@ -53,22 +58,27 @@ export const submitGoods = async ({
         rent: SYSVAR_RENT_PUBKEY,
       },
     });
+    return tx;
   }
 
   let txs = [];
-  // amounts.forEach((a, idx) => {
-  //   if (a > 0) {
-  //     txs.push(createTransaction(a, plants[idx]));
-  //   }
-  // });
-  return new Promise((res) => {
-    setTimeout(res, 1000);
+  amounts.forEach((a, idx) => {
+    if (a > 0) {
+      txs.push(createTransaction(a, plants[idx]));
+    }
   });
+  (window as any).asd = wallet;
+  if (txs.length === 0) return;
 
-  // TODO: Use transaction
-  // let transaction = new Transaction().add(...txs);
-  // return await props.wallet.sendTransaction(
-  //   transaction,
-  //   props.connection
-  // );
+  let transaction = new Transaction().add(...txs);
+
+  transaction.feePayer = wallet.publicKey;
+  transaction.recentBlockhash = (
+    await connection.getLatestBlockhash()
+  ).blockhash;
+  const signedTx = await wallet.signTransaction(transaction);
+  const txId = await connection.sendRawTransaction(signedTx.serialize());
+  return await connection.confirmTransaction(txId);
+
+  // return await connection.sendTransaction(transaction);
 };

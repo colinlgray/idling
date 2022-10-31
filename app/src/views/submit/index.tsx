@@ -2,7 +2,11 @@
 import { FC, useState, useEffect } from "react";
 import { plantSourceData, PlantSource } from "models/plantSourceData";
 import { usePlanterAddresses, useAddresses, useProgram } from "hooks";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import {
+  useConnection,
+  useWallet,
+  useAnchorWallet,
+} from "@solana/wallet-adapter-react";
 import { programs } from "@metaplex/js";
 import { submitGoods } from "./actions";
 import { Spinner } from "components/Spinner";
@@ -81,7 +85,9 @@ const EntryItem: FC<EntryItemProps> = ({ source, inputVal, onInputChange }) => {
 
 const PlantSubmissionForm: FC<{}> = () => {
   const addresses = useAddresses();
-  const { publicKey } = useWallet();
+  const { connection } = useConnection();
+
+  const wallet = useAnchorWallet();
   const [inputValues, setInputValues] = useState(
     plantSourceData.map(() => "0")
   );
@@ -92,11 +98,13 @@ const PlantSubmissionForm: FC<{}> = () => {
   const onClick = async () => {
     setLoading(true);
     await submitGoods({
-      owner: publicKey,
+      owner: wallet.publicKey,
       addresses,
       plants: plantSourceData,
       amounts: inputValues.map((val) => Number.parseInt(val)),
       leaderboard: program.leaderboard,
+      wallet,
+      connection,
     });
     setLoading(false);
   };
