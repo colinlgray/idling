@@ -7,6 +7,7 @@ import * as splToken from "@solana/spl-token";
 import { web3, BN, AccountClient } from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { Plant, Planter } from "../../models/types";
+import useUserTokenBalanceStore from "../../stores/useUserTokenBalanceStore";
 
 import { notify } from "../../utils/notifications";
 
@@ -30,6 +31,8 @@ export const PlanterInterface: FC<Props> = (props) => {
   const [planterData, setPlanterData] = useState<Planter | null>(null);
   const [plantData, setPlantData] = useState<Plant | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const balance = useUserTokenBalanceStore((s) => s.balance);
+  const { update } = useUserTokenBalanceStore();
 
   const refreshPlanter = async (
     planter: AccountClient,
@@ -106,7 +109,9 @@ export const PlanterInterface: FC<Props> = (props) => {
         program.idlePlants.account.plant,
         planterAddresses
       );
-      // TODO: subtract cost from current funds
+
+      update({ balance: balance - plantData.cost.toNumber() });
+
       notify({
         type: "success",
         message: "You have a new plant!",
