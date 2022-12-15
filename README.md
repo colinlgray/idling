@@ -1,3 +1,8 @@
+# Idling
+
+This is an unfinished idle game built for the Solana Hacker House
+This app is currently deployed to devnet and can be found at [https://idling.vercel.app/](https://idling.vercel.app/)
+
 ## Running programs on localnet
 
 1. Build projects.
